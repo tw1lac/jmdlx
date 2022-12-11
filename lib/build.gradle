@@ -9,7 +9,12 @@
 plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
+    // Maven publish for jitpack
+    id 'maven-publish'
 }
+
+sourceCompatibility = 1.17
+targetCompatibility = 1.17
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -30,4 +35,13 @@ dependencies {
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
 }
