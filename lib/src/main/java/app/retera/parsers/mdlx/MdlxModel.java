@@ -1,16 +1,14 @@
 package app.retera.parsers.mdlx;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import app.retera.parsers.mdlx.mdl.GhostwolfTokenInputStream;
-import app.retera.parsers.mdlx.mdl.GhostwolfTokenOutputStream;
+import app.retera.parsers.mdlx.mdl.MdlTokenInputStreamImpl;
+import app.retera.parsers.mdlx.mdl.MdlTokenOutputStreamImpl;
 import app.retera.util.MdlUtils;
 import app.retera.util.ParseUtils;
 import app.retera.util.War3ID;
@@ -328,13 +326,8 @@ public class MdlxModel {
 	}
 
 	public void loadMdl(final InputStream inputStream) throws IOException {
-		final byte[] array = ParseUtils.copyStreamToByteArray(inputStream);
-		loadMdl(ByteBuffer.wrap(array));
-	}
-
-	public void loadMdl(final ByteBuffer inputStream) throws IOException {
 		String token;
-		final MdlTokenInputStream stream = new GhostwolfTokenInputStream(inputStream);
+		final MdlTokenInputStream stream = new MdlTokenInputStreamImpl(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
 		while ((token = stream.read()) != null) {
 			switch (token) {
@@ -514,7 +507,7 @@ public class MdlxModel {
 
 	public void saveMdl(final OutputStream outputStream) throws IOException {
 		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
-			final MdlTokenOutputStream stream = new GhostwolfTokenOutputStream(writer);
+			final MdlTokenOutputStream stream = new MdlTokenOutputStreamImpl(writer);
 			this.saveVersionBlock(stream);
 			this.saveModelBlock(stream);
 			this.saveStaticObjectsBlock(stream, MdlUtils.TOKEN_SEQUENCES, this.sequences);

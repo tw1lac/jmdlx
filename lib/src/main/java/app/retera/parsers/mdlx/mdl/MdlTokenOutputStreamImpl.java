@@ -4,13 +4,13 @@ import java.io.IOException;
 
 import app.retera.parsers.mdlx.MdlTokenOutputStream;
 
-public class GhostwolfTokenOutputStream implements MdlTokenOutputStream {
+public class MdlTokenOutputStreamImpl implements MdlTokenOutputStream {
 	private final Appendable buffer;
 	private final int index;
 	private int ident;
 	private final int fractionDigits;
 
-	public GhostwolfTokenOutputStream(final Appendable appendable) {
+	public MdlTokenOutputStreamImpl(final Appendable appendable) {
 		this.buffer = appendable;
 		this.index = 0;
 		this.ident = 0; // Used for writing blocks nicely.

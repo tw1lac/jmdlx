@@ -1,21 +1,31 @@
 package app.retera.parsers.mdlx.mdl;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
 import app.retera.parsers.mdlx.MdlTokenInputStream;
 
-public class GhostwolfTokenInputStream implements MdlTokenInputStream {
-	private final ByteBuffer buffer;
-	private int index;
+public class MdlTokenInputStreamImpl implements MdlTokenInputStream {
+	private final Reader reader;
+	private int next;
 	private final int ident;
 	private final int fractionDigits;
 
-	public GhostwolfTokenInputStream(final ByteBuffer buffer) {
-		this.buffer = buffer;
-		this.index = 0;
+	public MdlTokenInputStreamImpl(final Reader reader) {
+		this.reader = reader;
+		this.next = readOneChar();
 		this.ident = 0; // Used for writing blocks nicely.
 		this.fractionDigits = 6; // The number of fraction digits when writing floats.
+	}
+
+	private int readOneChar() {
+		try {
+			return reader.read();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -23,12 +33,11 @@ public class GhostwolfTokenInputStream implements MdlTokenInputStream {
 		boolean inComment = false;
 		boolean inString = false;
 		final StringBuilder token = new StringBuilder();
-		final int length = this.buffer.remaining();
 
-		while (this.index < length) {
+		while (next != -1) {
 			// Note: cast from 'byte' to 'char' will cause Java incompatibility with Chinese
 			// and Russian/Cyrillic and others
-			final char c = (char) this.buffer.get(this.buffer.position() + this.index++);
+			final char c = (char) next;
 
 			if (inComment) {
 				if (c == '\n') {
@@ -50,16 +59,15 @@ public class GhostwolfTokenInputStream implements MdlTokenInputStream {
 			}
 			else if ((c == '{') || (c == '}')) {
 				if (token.length() > 0) {
-					this.index--;
 					return token.toString();
 				}
 				else {
+					next = readOneChar();
 					return Character.toString(c);
 				}
 			}
-			else if ((c == '/') && (this.buffer.get(this.buffer.position() + this.index) == '/')) {
+			else if ((c == '/') && ((next = readOneChar()) == '/')) {
 				if (token.length() > 0) {
-					this.index--;
 					return token.toString();
 				}
 				else {
@@ -68,7 +76,6 @@ public class GhostwolfTokenInputStream implements MdlTokenInputStream {
 			}
 			else if (c == '"') {
 				if (token.length() > 0) {
-					this.index--;
 					return token.toString();
 				}
 				else {
@@ -78,17 +85,23 @@ public class GhostwolfTokenInputStream implements MdlTokenInputStream {
 			else {
 				token.append(c);
 			}
+			next = readOneChar();
 		}
 		return null;
 	}
 
 	@Override
 	public String peek() {
-		final int index = this.index;
-		final String value = this.read();
-
-		this.index = index;
-		return value;
+		final int prevNext = next;
+		try {
+			reader.mark(1024);
+			final String value = this.read();
+			reader.reset();
+			next = prevNext;
+			return value;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
