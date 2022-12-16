@@ -327,7 +327,7 @@ public class MdlxModel {
 
 	public void loadMdl(final InputStream inputStream) throws IOException {
 		String token;
-		final MdlTokenInputStream stream = new MdlTokenInputStreamImpl(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+		final MdlTokenInputStream stream = new MdlTokenInputStreamImpl(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
 
 		while ((token = stream.read()) != null) {
 			switch (token) {
