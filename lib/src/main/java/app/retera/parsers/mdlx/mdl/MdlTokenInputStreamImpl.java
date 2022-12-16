@@ -46,6 +46,7 @@ public class MdlTokenInputStreamImpl implements MdlTokenInputStream {
 			}
 			else if (inString) {
 				if (c == '"') {
+					next = readOneChar();
 					return token.toString();
 				}
 				else {
