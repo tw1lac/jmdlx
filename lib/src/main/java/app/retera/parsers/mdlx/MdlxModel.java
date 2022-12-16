@@ -506,7 +506,7 @@ public class MdlxModel {
 	}
 
 	public void saveMdl(final OutputStream outputStream) throws IOException {
-		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
 			final MdlTokenOutputStream stream = new MdlTokenOutputStreamImpl(writer);
 			this.saveVersionBlock(stream);
 			this.saveModelBlock(stream);
