@@ -1,14 +1,11 @@
 package app.retera.parsers.mdlx;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
-import app.retera.parsers.mdlx.mdl.MdlTokenInputStreamImpl;
-import app.retera.parsers.mdlx.mdl.MdlTokenOutputStreamImpl;
 import app.retera.util.MdlUtils;
 import app.retera.util.ParseUtils;
 import app.retera.util.War3ID;
@@ -20,12 +17,9 @@ import com.google.common.io.LittleEndianDataOutputStream;
  * and text MDL file formats.
  */
 public class MdlxModel {
-	// Below, these can't call a function on a string to make their value
-	// because
-	// switch/case statements require the value to be compile-time defined in
-	// order
-	// to be legal, and it appears to only allow basic binary operators for
-	// that.
+	// Below, these can't call a function on a string to make their value because
+	// switch/case statements require the value to be compile-time defined in order
+	// to be legal, and it appears to only allow basic binary operators for that.
 	// I would love a clearer way to just type 'MDLX' in a character constant in
 	// Java for this
 	private static final int MDLX = ('M' << 24) | ('D' << 16) | ('L' << 8) | ('X');// War3ID.fromString("MDLX").getValue();
@@ -104,68 +98,27 @@ public class MdlxModel {
 			final long size = ParseUtils.readUInt32(stream);
 
 			switch (tag) {
-			case VERS:
-				loadVersionChunk(stream);
-				break;
-			case MODL:
-				loadModelChunk(stream);
-				break;
-			case SEQS:
-				loadStaticObjects(this.sequences, MdlxBlockDescriptor.SEQUENCE, stream, size / 132);
-				break;
-			case GLBS:
-				loadGlobalSequenceChunk(stream, size);
-				break;
-			case MTLS:
-				loadDynamicObjects(this.materials, MdlxBlockDescriptor.MATERIAL, stream, size);
-				break;
-			case TEXS:
-				loadStaticObjects(this.textures, MdlxBlockDescriptor.TEXTURE, stream, size / 268);
-				break;
-			case TXAN:
-				loadDynamicObjects(this.textureAnimations, MdlxBlockDescriptor.TEXTURE_ANIMATION, stream, size);
-				break;
-			case GEOS:
-				loadDynamicObjects(this.geosets, MdlxBlockDescriptor.GEOSET, stream, size);
-				break;
-			case GEOA:
-				loadDynamicObjects(this.geosetAnimations, MdlxBlockDescriptor.GEOSET_ANIMATION, stream, size);
-				break;
-			case BONE:
-				loadDynamicObjects(this.bones, MdlxBlockDescriptor.BONE, stream, size);
-				break;
-			case LITE:
-				loadDynamicObjects(this.lights, MdlxBlockDescriptor.LIGHT, stream, size);
-				break;
-			case HELP:
-				loadDynamicObjects(this.helpers, MdlxBlockDescriptor.HELPER, stream, size);
-				break;
-			case ATCH:
-				loadDynamicObjects(this.attachments, MdlxBlockDescriptor.ATTACHMENT, stream, size);
-				break;
-			case PIVT:
-				loadPivotPointChunk(stream, size);
-				break;
-			case PREM:
-				loadDynamicObjects(this.particleEmitters, MdlxBlockDescriptor.PARTICLE_EMITTER, stream, size);
-				break;
-			case PRE2:
-				loadDynamicObjects(this.particleEmitters2, MdlxBlockDescriptor.PARTICLE_EMITTER2, stream, size);
-				break;
-			case RIBB:
-				loadDynamicObjects(this.ribbonEmitters, MdlxBlockDescriptor.RIBBON_EMITTER, stream, size);
-				break;
-			case CAMS:
-				loadDynamicObjects(this.cameras, MdlxBlockDescriptor.CAMERA, stream, size);
-				break;
-			case EVTS:
-				loadDynamicObjects(this.eventObjects, MdlxBlockDescriptor.EVENT_OBJECT, stream, size);
-				break;
-			case CLID:
-				loadDynamicObjects(this.collisionShapes, MdlxBlockDescriptor.COLLISION_SHAPE, stream, size);
-				break;
-			default:
-				this.unknownChunks.add(new UnknownChunk(stream, size, new War3ID(tag)));
+				case VERS -> loadVersionChunk(stream);
+				case MODL -> loadModelChunk(stream);
+				case SEQS -> loadStaticObjects(this.sequences, Sequence::new, stream, size / 132);
+				case GLBS -> loadGlobalSequenceChunk(stream, size);
+				case MTLS -> loadDynamicObjects(this.materials, Material::new, stream, size);
+				case TEXS -> loadStaticObjects(this.textures, Texture::new, stream, size / 268);
+				case TXAN -> loadDynamicObjects(this.textureAnimations, TextureAnimation::new, stream, size);
+				case GEOS -> loadDynamicObjects(this.geosets, Geoset::new, stream, size);
+				case GEOA -> loadDynamicObjects(this.geosetAnimations, GeosetAnimation::new, stream, size);
+				case BONE -> loadDynamicObjects(this.bones, Bone::new, stream, size);
+				case LITE -> loadDynamicObjects(this.lights, Light::new, stream, size);
+				case HELP -> loadDynamicObjects(this.helpers, Helper::new, stream, size);
+				case ATCH -> loadDynamicObjects(this.attachments, Attachment::new, stream, size);
+				case PIVT -> loadPivotPointChunk(stream, size);
+				case PREM -> loadDynamicObjects(this.particleEmitters, ParticleEmitter::new, stream, size);
+				case PRE2 -> loadDynamicObjects(this.particleEmitters2, ParticleEmitter2::new, stream, size);
+				case RIBB -> loadDynamicObjects(this.ribbonEmitters, RibbonEmitter::new, stream, size);
+				case CAMS -> loadDynamicObjects(this.cameras, Camera::new, stream, size);
+				case EVTS -> loadDynamicObjects(this.eventObjects, EventObject::new, stream, size);
+				case CLID -> loadDynamicObjects(this.collisionShapes, CollisionShape::new, stream, size);
+				default -> this.unknownChunks.add(new UnknownChunk(stream, size, new War3ID(tag)));
 			}
 		}
 
@@ -188,11 +141,12 @@ public class MdlxModel {
 		this.extent.readMdx(stream);
 		this.blendTime = ParseUtils.readUInt32(stream);
 	}
-
-	private <E extends MdlxBlock> void loadStaticObjects(final List<E> out, final MdlxBlockDescriptor<E> constructor,
-			final LittleEndianDataInputStream stream, final long count) throws IOException {
+	private <E extends MdlxBlock> void loadStaticObjects(final List<E> out,
+	                                                     final Supplier<E> constructor,
+	                                                     final LittleEndianDataInputStream stream,
+	                                                     final long count) throws IOException {
 		for (int i = 0; i < count; i++) {
-			final E object = constructor.create();
+			final E object = constructor.get();
 
 			object.readMdx(stream);
 
@@ -207,11 +161,12 @@ public class MdlxModel {
 	}
 
 	private <E extends MdlxBlock & Chunk> void loadDynamicObjects(final List<E> out,
-			final MdlxBlockDescriptor<E> constructor, final LittleEndianDataInputStream stream, final long size)
-			throws IOException {
+	                                                              final Supplier<E>  constructor,
+	                                                              final LittleEndianDataInputStream stream,
+	                                                              final long size) throws IOException {
 		long totalSize = 0;
 		while (totalSize < size) {
-			final E object = constructor.create();
+			final E object = constructor.get();
 
 			object.readMdx(stream);
 
@@ -327,85 +282,40 @@ public class MdlxModel {
 
 	public void loadMdl(final InputStream inputStream) throws IOException {
 		String token;
-		final MdlTokenInputStream stream = new MdlTokenInputStreamImpl(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
+		final MdlTokenInputStream stream = new MdlTokenInputStream(new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)));
 
 		while ((token = stream.read()) != null) {
 			switch (token) {
-			case MdlUtils.TOKEN_VERSION:
-				this.loadVersionBlock(stream);
-				break;
-			case MdlUtils.TOKEN_MODEL:
-				this.loadModelBlock(stream);
-				break;
-			case MdlUtils.TOKEN_SEQUENCES:
-				this.loadNumberedObjectBlock(this.sequences, MdlxBlockDescriptor.SEQUENCE, MdlUtils.TOKEN_ANIM, stream);
-				break;
-			case MdlUtils.TOKEN_GLOBAL_SEQUENCES:
-				this.loadGlobalSequenceBlock(stream);
-				break;
-			case MdlUtils.TOKEN_TEXTURES:
-				this.loadNumberedObjectBlock(this.textures, MdlxBlockDescriptor.TEXTURE, MdlUtils.TOKEN_BITMAP, stream);
-				break;
-			case MdlUtils.TOKEN_MATERIALS:
-				this.loadNumberedObjectBlock(this.materials, MdlxBlockDescriptor.MATERIAL, MdlUtils.TOKEN_MATERIAL,
-						stream);
-				break;
-			case MdlUtils.TOKEN_TEXTURE_ANIMS:
-				this.loadNumberedObjectBlock(this.textureAnimations, MdlxBlockDescriptor.TEXTURE_ANIMATION,
-						MdlUtils.TOKEN_TVERTEX_ANIM, stream);
-				break;
-			case MdlUtils.TOKEN_GEOSET:
-				this.loadObject(this.geosets, MdlxBlockDescriptor.GEOSET, stream);
-				break;
-			case MdlUtils.TOKEN_GEOSETANIM:
-				this.loadObject(this.geosetAnimations, MdlxBlockDescriptor.GEOSET_ANIMATION, stream);
-				break;
-			case MdlUtils.TOKEN_BONE:
-				this.loadObject(this.bones, MdlxBlockDescriptor.BONE, stream);
-				break;
-			case MdlUtils.TOKEN_LIGHT:
-				this.loadObject(this.lights, MdlxBlockDescriptor.LIGHT, stream);
-				break;
-			case MdlUtils.TOKEN_HELPER:
-				this.loadObject(this.helpers, MdlxBlockDescriptor.HELPER, stream);
-				break;
-			case MdlUtils.TOKEN_ATTACHMENT:
-				this.loadObject(this.attachments, MdlxBlockDescriptor.ATTACHMENT, stream);
-				break;
-			case MdlUtils.TOKEN_PIVOT_POINTS:
-				this.loadPivotPointBlock(stream);
-				break;
-			case MdlUtils.TOKEN_PARTICLE_EMITTER:
-				this.loadObject(this.particleEmitters, MdlxBlockDescriptor.PARTICLE_EMITTER, stream);
-				break;
-			case MdlUtils.TOKEN_PARTICLE_EMITTER2:
-				this.loadObject(this.particleEmitters2, MdlxBlockDescriptor.PARTICLE_EMITTER2, stream);
-				break;
-			case MdlUtils.TOKEN_RIBBON_EMITTER:
-				this.loadObject(this.ribbonEmitters, MdlxBlockDescriptor.RIBBON_EMITTER, stream);
-				break;
-			case MdlUtils.TOKEN_CAMERA:
-				this.loadObject(this.cameras, MdlxBlockDescriptor.CAMERA, stream);
-				break;
-			case MdlUtils.TOKEN_EVENT_OBJECT:
-				this.loadObject(this.eventObjects, MdlxBlockDescriptor.EVENT_OBJECT, stream);
-				break;
-			case MdlUtils.TOKEN_COLLISION_SHAPE:
-				this.loadObject(this.collisionShapes, MdlxBlockDescriptor.COLLISION_SHAPE, stream);
-				break;
-			default:
-				throw new IllegalStateException("Unsupported block: " + token);
+				case MdlUtils.TOKEN_VERSION             -> this.loadVersionBlock(stream);
+				case MdlUtils.TOKEN_MODEL               -> this.loadModelBlock(stream);
+				case MdlUtils.TOKEN_SEQUENCES           -> this.loadNumberedObjectBlock(this.sequences, Sequence::new, MdlUtils.TOKEN_ANIM, stream);
+				case MdlUtils.TOKEN_GLOBAL_SEQUENCES    -> this.loadGlobalSequenceBlock(stream);
+				case MdlUtils.TOKEN_TEXTURES            -> this.loadNumberedObjectBlock(this.textures, Texture::new, MdlUtils.TOKEN_BITMAP, stream);
+				case MdlUtils.TOKEN_MATERIALS           -> this.loadNumberedObjectBlock(this.materials, Material::new, MdlUtils.TOKEN_MATERIAL, stream);
+				case MdlUtils.TOKEN_TEXTURE_ANIMS       -> this.loadNumberedObjectBlock(this.textureAnimations, TextureAnimation::new, MdlUtils.TOKEN_TVERTEX_ANIM, stream);
+				case MdlUtils.TOKEN_GEOSET              -> this.loadObject(this.geosets, Geoset::new, stream);
+				case MdlUtils.TOKEN_GEOSETANIM          -> this.loadObject(this.geosetAnimations, GeosetAnimation::new, stream);
+				case MdlUtils.TOKEN_BONE                -> this.loadObject(this.bones, Bone::new, stream);
+				case MdlUtils.TOKEN_LIGHT               -> this.loadObject(this.lights, Light::new, stream);
+				case MdlUtils.TOKEN_HELPER              -> this.loadObject(this.helpers, Helper::new, stream);
+				case MdlUtils.TOKEN_ATTACHMENT          -> this.loadObject(this.attachments, Attachment::new, stream);
+				case MdlUtils.TOKEN_PIVOT_POINTS        -> this.loadPivotPointBlock(stream);
+				case MdlUtils.TOKEN_PARTICLE_EMITTER    -> this.loadObject(this.particleEmitters, ParticleEmitter::new, stream);
+				case MdlUtils.TOKEN_PARTICLE_EMITTER2   -> this.loadObject(this.particleEmitters2, ParticleEmitter2::new, stream);
+				case MdlUtils.TOKEN_RIBBON_EMITTER      -> this.loadObject(this.ribbonEmitters, RibbonEmitter::new, stream);
+				case MdlUtils.TOKEN_CAMERA              -> this.loadObject(this.cameras, Camera::new, stream);
+				case MdlUtils.TOKEN_EVENT_OBJECT        -> this.loadObject(this.eventObjects, EventObject::new, stream);
+				case MdlUtils.TOKEN_COLLISION_SHAPE     -> this.loadObject(this.collisionShapes, CollisionShape::new, stream);
+				default -> throw new IllegalStateException("Unsupported block: " + token);
 			}
 		}
 	}
 
 	private void loadVersionBlock(final MdlTokenInputStream stream) {
 		for (final String token : stream.readBlock()) {
-			switch (token) {
-			case MdlUtils.TOKEN_FORMAT_VERSION:
+			if (MdlUtils.TOKEN_FORMAT_VERSION.equals(token)) {
 				this.version = stream.readInt();
-				break;
-			default:
+			} else {
 				throw new IllegalStateException("Unknown token in Version: " + token);
 			}
 		}
@@ -433,33 +343,25 @@ public class MdlxModel {
 			}
 			else {
 				switch (token) {
-				case MdlUtils.TOKEN_BLEND_TIME:
-					this.blendTime = stream.readUInt32();
-					break;
-				case MdlUtils.TOKEN_MINIMUM_EXTENT:
-					stream.readFloatArray(this.extent.min);
-					break;
-				case MdlUtils.TOKEN_MAXIMUM_EXTENT:
-					stream.readFloatArray(this.extent.max);
-					break;
-				case MdlUtils.TOKEN_BOUNDSRADIUS:
-					this.extent.boundsRadius = stream.readFloat();
-					break;
-				default:
-					throw new IllegalStateException("Unknown token in Model: " + token);
+					case MdlUtils.TOKEN_BLEND_TIME -> this.blendTime = stream.readUInt32();
+					case MdlUtils.TOKEN_MINIMUM_EXTENT -> stream.readFloatArray(this.extent.min);
+					case MdlUtils.TOKEN_MAXIMUM_EXTENT -> stream.readFloatArray(this.extent.max);
+					case MdlUtils.TOKEN_BOUNDSRADIUS -> this.extent.boundsRadius = stream.readFloat();
+					default -> throw new IllegalStateException("Unknown token in Model: " + token);
 				}
 			}
 		}
 	}
 
 	private <E extends MdlxBlock> void loadNumberedObjectBlock(final List<E> out,
-			final MdlxBlockDescriptor<E> constructor, final String name, final MdlTokenInputStream stream)
-			throws IOException {
+	                                                           final Supplier<E> constructor,
+	                                                           final String name,
+	                                                           final MdlTokenInputStream stream) throws IOException {
 		stream.read(); // Don't care about the number, the array will grow
 
 		for (final String token : stream.readBlock()) {
 			if (token.equals(name)) {
-				final E object = constructor.create();
+				final E object = constructor.get();
 
 				object.readMdl(stream);
 
@@ -484,9 +386,10 @@ public class MdlxModel {
 		}
 	}
 
-	private <E extends MdlxBlock> void loadObject(final List<E> out, final MdlxBlockDescriptor<E> descriptor,
-			final MdlTokenInputStream stream) throws IOException {
-		final E object = descriptor.create();
+	private <E extends MdlxBlock> void loadObject(final List<E> out,
+	                                              final Supplier<E> descriptor,
+	                                              final MdlTokenInputStream stream) throws IOException {
+		final E object = descriptor.get();
 
 		object.readMdl(stream);
 
@@ -507,7 +410,7 @@ public class MdlxModel {
 
 	public void saveMdl(final OutputStream outputStream) throws IOException {
 		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-			final MdlTokenOutputStream stream = new MdlTokenOutputStreamImpl(writer);
+			final MdlTokenOutputStream stream = new MdlTokenOutputStream(writer);
 			this.saveVersionBlock(stream);
 			this.saveModelBlock(stream);
 			this.saveStaticObjectsBlock(stream, MdlUtils.TOKEN_SEQUENCES, this.sequences);

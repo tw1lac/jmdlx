@@ -155,151 +155,59 @@ public class ParticleEmitter2 extends GenericObject {
 	public void readMdl(final MdlTokenInputStream stream) throws IOException {
 		for (final String token : super.readMdlGeneric(stream)) {
 			switch (token) {
-			case MdlUtils.TOKEN_SORT_PRIMS_FAR_Z:
-				this.flags |= 0x10000;
-				break;
-			case MdlUtils.TOKEN_UNSHADED:
-				this.flags |= 0x8000;
-				break;
-			case MdlUtils.TOKEN_LINE_EMITTER:
-				this.flags |= 0x20000;
-				break;
-			case MdlUtils.TOKEN_UNFOGGED:
-				this.flags |= 0x40000;
-				break;
-			case MdlUtils.TOKEN_MODEL_SPACE:
-				this.flags |= 0x80000;
-				break;
-			case MdlUtils.TOKEN_XY_QUAD:
-				this.flags |= 0x100000;
-				break;
-			case MdlUtils.TOKEN_STATIC_SPEED:
-				this.speed = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_SPEED:
-				readTimeline(stream, AnimationMap.KP2S);
-				break;
-			case MdlUtils.TOKEN_STATIC_VARIATION:
-				this.variation = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_VARIATION:
-				readTimeline(stream, AnimationMap.KP2R);
-				break;
-			case MdlUtils.TOKEN_STATIC_LATITUDE:
-				this.latitude = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_LATITUDE:
-				readTimeline(stream, AnimationMap.KP2L);
-				break;
-			case MdlUtils.TOKEN_STATIC_GRAVITY:
-				this.gravity = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_GRAVITY:
-				readTimeline(stream, AnimationMap.KP2G);
-				break;
-			case MdlUtils.TOKEN_VISIBILITY:
-				readTimeline(stream, AnimationMap.KP2V);
-				break;
-			case MdlUtils.TOKEN_SQUIRT:
-				this.squirt = 1;
-				break;
-			case MdlUtils.TOKEN_LIFE_SPAN:
-				this.lifeSpan = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_STATIC_EMISSION_RATE:
-				this.emissionRate = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_EMISSION_RATE:
-				readTimeline(stream, AnimationMap.KP2E);
-				break;
-			case MdlUtils.TOKEN_STATIC_WIDTH:
-				this.width = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_WIDTH:
-				readTimeline(stream, AnimationMap.KP2W);
-				break;
-			case MdlUtils.TOKEN_STATIC_LENGTH:
-				this.length = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_LENGTH:
-				readTimeline(stream, AnimationMap.KP2N);
-				break;
-			case MdlUtils.TOKEN_BLEND:
-				this.filterMode = FilterMode.BLEND;
-				break;
-			case MdlUtils.TOKEN_ADDITIVE:
-				this.filterMode = FilterMode.ADDITIVE;
-				break;
-			case MdlUtils.TOKEN_MODULATE:
-				this.filterMode = FilterMode.MODULATE;
-				break;
-			case MdlUtils.TOKEN_MODULATE2X:
-				this.filterMode = FilterMode.MODULATE2X;
-				break;
-			case MdlUtils.TOKEN_ALPHAKEY:
-				this.filterMode = FilterMode.ALPHAKEY;
-				break;
-			case MdlUtils.TOKEN_ROWS:
-				this.rows = stream.readUInt32();
-				break;
-			case MdlUtils.TOKEN_COLUMNS:
-				this.columns = stream.readUInt32();
-				break;
-			case MdlUtils.TOKEN_HEAD:
-				this.headOrTail = 0;
-				break;
-			case MdlUtils.TOKEN_TAIL:
-				this.headOrTail = 1;
-				break;
-			case MdlUtils.TOKEN_BOTH:
-				this.headOrTail = 2;
-				break;
-			case MdlUtils.TOKEN_TAIL_LENGTH:
-				this.tailLength = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_TIME:
-				this.timeMiddle = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_SEGMENT_COLOR:
-				stream.read(); // {
-
-				for (int i = 0; i < 3; i++) {
-					stream.read(); // Color
-					stream.readColor(this.segmentColors[i]);
+				case MdlUtils.TOKEN_SORT_PRIMS_FAR_Z -> this.flags |= 0x10000;
+				case MdlUtils.TOKEN_UNSHADED -> this.flags |= 0x8000;
+				case MdlUtils.TOKEN_LINE_EMITTER -> this.flags |= 0x20000;
+				case MdlUtils.TOKEN_UNFOGGED -> this.flags |= 0x40000;
+				case MdlUtils.TOKEN_MODEL_SPACE -> this.flags |= 0x80000;
+				case MdlUtils.TOKEN_XY_QUAD -> this.flags |= 0x100000;
+				case MdlUtils.TOKEN_STATIC_SPEED -> this.speed = stream.readFloat();
+				case MdlUtils.TOKEN_SPEED -> readTimeline(stream, AnimationMap.KP2S);
+				case MdlUtils.TOKEN_STATIC_VARIATION -> this.variation = stream.readFloat();
+				case MdlUtils.TOKEN_VARIATION -> readTimeline(stream, AnimationMap.KP2R);
+				case MdlUtils.TOKEN_STATIC_LATITUDE -> this.latitude = stream.readFloat();
+				case MdlUtils.TOKEN_LATITUDE -> readTimeline(stream, AnimationMap.KP2L);
+				case MdlUtils.TOKEN_STATIC_GRAVITY -> this.gravity = stream.readFloat();
+				case MdlUtils.TOKEN_GRAVITY -> readTimeline(stream, AnimationMap.KP2G);
+				case MdlUtils.TOKEN_VISIBILITY -> readTimeline(stream, AnimationMap.KP2V);
+				case MdlUtils.TOKEN_SQUIRT -> this.squirt = 1;
+				case MdlUtils.TOKEN_LIFE_SPAN -> this.lifeSpan = stream.readFloat();
+				case MdlUtils.TOKEN_STATIC_EMISSION_RATE -> this.emissionRate = stream.readFloat();
+				case MdlUtils.TOKEN_EMISSION_RATE -> readTimeline(stream, AnimationMap.KP2E);
+				case MdlUtils.TOKEN_STATIC_WIDTH -> this.width = stream.readFloat();
+				case MdlUtils.TOKEN_WIDTH -> readTimeline(stream, AnimationMap.KP2W);
+				case MdlUtils.TOKEN_STATIC_LENGTH -> this.length = stream.readFloat();
+				case MdlUtils.TOKEN_LENGTH -> readTimeline(stream, AnimationMap.KP2N);
+				case MdlUtils.TOKEN_BLEND -> this.filterMode = FilterMode.BLEND;
+				case MdlUtils.TOKEN_ADDITIVE -> this.filterMode = FilterMode.ADDITIVE;
+				case MdlUtils.TOKEN_MODULATE -> this.filterMode = FilterMode.MODULATE;
+				case MdlUtils.TOKEN_MODULATE2X -> this.filterMode = FilterMode.MODULATE2X;
+				case MdlUtils.TOKEN_ALPHAKEY -> this.filterMode = FilterMode.ALPHAKEY;
+				case MdlUtils.TOKEN_ROWS -> this.rows = stream.readUInt32();
+				case MdlUtils.TOKEN_COLUMNS -> this.columns = stream.readUInt32();
+				case MdlUtils.TOKEN_HEAD -> this.headOrTail = 0;
+				case MdlUtils.TOKEN_TAIL -> this.headOrTail = 1;
+				case MdlUtils.TOKEN_BOTH -> this.headOrTail = 2;
+				case MdlUtils.TOKEN_TAIL_LENGTH -> this.tailLength = stream.readFloat();
+				case MdlUtils.TOKEN_TIME -> this.timeMiddle = stream.readFloat();
+				case MdlUtils.TOKEN_SEGMENT_COLOR -> {
+					stream.read(); // {
+					for (int i = 0; i < 3; i++) {
+						stream.read(); // Color
+						stream.readColor(this.segmentColors[i]);
+					}
+					stream.read(); // }
 				}
-
-				stream.read(); // }
-				break;
-			case MdlUtils.TOKEN_ALPHA:
-				stream.readUInt8Array(this.segmentAlphas);
-				break;
-			case MdlUtils.TOKEN_PARTICLE_SCALING:
-				stream.readFloatArray(this.segmentScaling);
-				break;
-			case MdlUtils.TOKEN_LIFE_SPAN_UV_ANIM:
-				stream.readIntArray(this.headIntervals[0]);
-				break;
-			case MdlUtils.TOKEN_DECAY_UV_ANIM:
-				stream.readIntArray(this.headIntervals[1]);
-				break;
-			case MdlUtils.TOKEN_TAIL_UV_ANIM:
-				stream.readIntArray(this.tailIntervals[0]);
-				break;
-			case MdlUtils.TOKEN_TAIL_DECAY_UV_ANIM:
-				stream.readIntArray(this.tailIntervals[1]);
-				break;
-			case MdlUtils.TOKEN_TEXTURE_ID:
-				this.textureId = stream.readInt();
-				break;
-			case MdlUtils.TOKEN_REPLACEABLE_ID:
-				this.replaceableId = stream.readUInt32();
-				break;
-			case MdlUtils.TOKEN_PRIORITY_PLANE:
-				this.priorityPlane = stream.readInt();
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown token in ParticleEmitter2 " + this.name + ": " + token);
+				case MdlUtils.TOKEN_ALPHA -> stream.readUInt8Array(this.segmentAlphas);
+				case MdlUtils.TOKEN_PARTICLE_SCALING -> stream.readFloatArray(this.segmentScaling);
+				case MdlUtils.TOKEN_LIFE_SPAN_UV_ANIM -> stream.readIntArray(this.headIntervals[0]);
+				case MdlUtils.TOKEN_DECAY_UV_ANIM -> stream.readIntArray(this.headIntervals[1]);
+				case MdlUtils.TOKEN_TAIL_UV_ANIM -> stream.readIntArray(this.tailIntervals[0]);
+				case MdlUtils.TOKEN_TAIL_DECAY_UV_ANIM -> stream.readIntArray(this.tailIntervals[1]);
+				case MdlUtils.TOKEN_TEXTURE_ID -> this.textureId = stream.readInt();
+				case MdlUtils.TOKEN_REPLACEABLE_ID -> this.replaceableId = stream.readUInt32();
+				case MdlUtils.TOKEN_PRIORITY_PLANE -> this.priorityPlane = stream.readInt();
+				default -> throw new IllegalStateException("Unknown token in ParticleEmitter2 " + this.name + ": " + token);
 			}
 		}
 	}
@@ -375,17 +283,10 @@ public class ParticleEmitter2 extends GenericObject {
 		stream.writeAttribUInt32(MdlUtils.TOKEN_COLUMNS, this.columns);
 
 		switch ((int) this.headOrTail) {
-		case 0:
-			stream.writeFlag(MdlUtils.TOKEN_HEAD);
-			break;
-		case 1:
-			stream.writeFlag(MdlUtils.TOKEN_TAIL);
-			break;
-		case 2:
-			stream.writeFlag(MdlUtils.TOKEN_BOTH);
-			break;
-		default:
-			throw new IllegalStateException("Bad headOrTail value when saving MDL: " + this.headOrTail);
+			case 0 -> stream.writeFlag(MdlUtils.TOKEN_HEAD);
+			case 1 -> stream.writeFlag(MdlUtils.TOKEN_TAIL);
+			case 2 -> stream.writeFlag(MdlUtils.TOKEN_BOTH);
+			default -> throw new IllegalStateException("Bad headOrTail value when saving MDL: " + this.headOrTail);
 		}
 
 		stream.writeFloatAttrib(MdlUtils.TOKEN_TAIL_LENGTH, this.tailLength);

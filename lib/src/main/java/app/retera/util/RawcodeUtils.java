@@ -17,8 +17,8 @@ public final class RawcodeUtils {
 		final byte[] bytes = id.getBytes(StandardCharsets.US_ASCII);
 		int result = 0;
 		if (bytes.length >= 4) {
-			result |= (bytes[3] << 0) & 0x000000FF;
-			result |= (bytes[2] << 8) & 0x0000FF00;
+			result |= (bytes[3] <<  0) & 0x000000FF;
+			result |= (bytes[2] <<  8) & 0x0000FF00;
 			result |= (bytes[1] << 16) & 0x00FF0000;
 			result |= (bytes[0] << 24) & 0xFF000000;
 		}
@@ -54,8 +54,8 @@ public final class RawcodeUtils {
 	public static String toString(final int id, final StringBuffer result) {
 		result.append((char) ((id >> 24) & 0xFF));
 		result.append((char) ((id >> 16) & 0xFF));
-		result.append((char) ((id >> 8) & 0xFF));
-		result.append((char) ((id >> 0) & 0xFF));
+		result.append((char) ((id >>  8) & 0xFF));
+		result.append((char) ((id >>  0) & 0xFF));
 
 		return result.toString();
 	}

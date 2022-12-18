@@ -50,29 +50,17 @@ public class Material implements MdlxBlock, Chunk {
 	public void readMdl(final MdlTokenInputStream stream) throws IOException {
 		for (final String token : stream.readBlock()) {
 			switch (token) {
-			case MdlUtils.TOKEN_CONSTANT_COLOR:
-				this.flags |= 0x1;
-				break;
-			case MdlUtils.TOKEN_SORT_PRIMS_NEAR_Z:
-				this.flags |= 0x8;
-				break;
-			case MdlUtils.TOKEN_SORT_PRIMS_FAR_Z:
-				this.flags |= 0x10;
-				break;
-			case MdlUtils.TOKEN_FULL_RESOLUTION:
-				this.flags |= 0x20;
-				break;
-			case MdlUtils.TOKEN_PRIORITY_PLANE:
-				this.priorityPlane = stream.readInt();
-				break;
-			case MdlUtils.TOKEN_LAYER: {
-				final Layer layer = new Layer();
-				layer.readMdl(stream);
-				this.layers.add(layer);
-				break;
-			}
-			default:
-				throw new IllegalStateException("Unknown token in Material: " + token);
+				case MdlUtils.TOKEN_CONSTANT_COLOR -> this.flags |= 0x1;
+				case MdlUtils.TOKEN_SORT_PRIMS_NEAR_Z -> this.flags |= 0x8;
+				case MdlUtils.TOKEN_SORT_PRIMS_FAR_Z -> this.flags |= 0x10;
+				case MdlUtils.TOKEN_FULL_RESOLUTION -> this.flags |= 0x20;
+				case MdlUtils.TOKEN_PRIORITY_PLANE -> this.priorityPlane = stream.readInt();
+				case MdlUtils.TOKEN_LAYER -> {
+					final Layer layer = new Layer();
+					layer.readMdl(stream);
+					this.layers.add(layer);
+				}
+				default -> throw new IllegalStateException("Unknown token in Material: " + token);
 			}
 		}
 	}

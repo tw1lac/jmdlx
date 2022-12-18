@@ -251,79 +251,73 @@ public abstract class GenericObject extends AnimatedObject implements Chunk {
 					break;
 				}
 				switch (token) {
-				case MdlUtils.TOKEN_OBJECTID:
-					this.updatingObject.objectId = Integer.parseInt(this.delegate.next());
-					token = null;
-					break;
-				case MdlUtils.TOKEN_PARENT:
-					this.updatingObject.parentId = Integer.parseInt(this.delegate.next());
-					token = null;
-					break;
-				case MdlUtils.TOKEN_BILLBOARDED_LOCK_Z:
-					this.updatingObject.flags |= 0x40;
-					token = null;
-					break;
-				case MdlUtils.TOKEN_BILLBOARDED_LOCK_Y:
-					this.updatingObject.flags |= 0x20;
-					token = null;
-					break;
-				case MdlUtils.TOKEN_BILLBOARDED_LOCK_X:
-					this.updatingObject.flags |= 0x10;
-					token = null;
-					break;
-				case MdlUtils.TOKEN_BILLBOARDED:
-					this.updatingObject.flags |= 0x8;
-					token = null;
-					break;
-				case MdlUtils.TOKEN_CAMERA_ANCHORED:
-					this.updatingObject.flags |= 0x80;
-					token = null;
-					break;
-				case MdlUtils.TOKEN_DONT_INHERIT:
-					for (final String subToken : this.stream.readBlock()) {
-						switch (subToken) {
-						case MdlUtils.TOKEN_ROTATION:
-							this.updatingObject.flags |= 0x2;
-							break;
-						case MdlUtils.TOKEN_TRANSLATION:
-							this.updatingObject.flags |= 0x1;
-							break;
-						case MdlUtils.TOKEN_SCALING:
-							this.updatingObject.flags |= 0x0;
-							break;
+					case MdlUtils.TOKEN_OBJECTID:
+						this.updatingObject.objectId = Integer.parseInt(this.delegate.next());
+						token = null;
+						break;
+					case MdlUtils.TOKEN_PARENT:
+						this.updatingObject.parentId = Integer.parseInt(this.delegate.next());
+						token = null;
+						break;
+					case MdlUtils.TOKEN_BILLBOARDED_LOCK_Z:
+						this.updatingObject.flags |= 0x40;
+						token = null;
+						break;
+					case MdlUtils.TOKEN_BILLBOARDED_LOCK_Y:
+						this.updatingObject.flags |= 0x20;
+						token = null;
+						break;
+					case MdlUtils.TOKEN_BILLBOARDED_LOCK_X:
+						this.updatingObject.flags |= 0x10;
+						token = null;
+						break;
+					case MdlUtils.TOKEN_BILLBOARDED:
+						this.updatingObject.flags |= 0x8;
+						token = null;
+						break;
+					case MdlUtils.TOKEN_CAMERA_ANCHORED:
+						this.updatingObject.flags |= 0x80;
+						token = null;
+						break;
+					case MdlUtils.TOKEN_DONT_INHERIT:
+						for (final String subToken : this.stream.readBlock()) {
+							switch (subToken) {
+								case MdlUtils.TOKEN_ROTATION -> this.updatingObject.flags |= 0x2;
+								case MdlUtils.TOKEN_TRANSLATION -> this.updatingObject.flags |= 0x1;
+								case MdlUtils.TOKEN_SCALING -> this.updatingObject.flags |= 0x0;
+							}
 						}
-					}
-					token = null;
-					break;
-				case MdlUtils.TOKEN_TRANSLATION:
-					try {
-						this.updatingObject.readTimeline(this.stream, AnimationMap.KGTR);
-					}
-					catch (final IOException e) {
-						throw new RuntimeException(e);
-					}
-					token = null;
-					break;
-				case MdlUtils.TOKEN_ROTATION:
-					try {
-						this.updatingObject.readTimeline(this.stream, AnimationMap.KGRT);
-					}
-					catch (final IOException e) {
-						throw new RuntimeException(e);
-					}
-					token = null;
-					break;
-				case MdlUtils.TOKEN_SCALING:
-					try {
-						this.updatingObject.readTimeline(this.stream, AnimationMap.KGSC);
-					}
-					catch (final IOException e) {
-						throw new RuntimeException(e);
-					}
-					token = null;
-					break;
-				default:
-					break InteriorParsing;
+						token = null;
+						break;
+					case MdlUtils.TOKEN_TRANSLATION:
+						try {
+							this.updatingObject.readTimeline(this.stream, AnimationMap.KGTR);
+						}
+						catch (final IOException e) {
+							throw new RuntimeException(e);
+						}
+						token = null;
+						break;
+					case MdlUtils.TOKEN_ROTATION:
+						try {
+							this.updatingObject.readTimeline(this.stream, AnimationMap.KGRT);
+						}
+						catch (final IOException e) {
+							throw new RuntimeException(e);
+						}
+						token = null;
+						break;
+					case MdlUtils.TOKEN_SCALING:
+						try {
+							this.updatingObject.readTimeline(this.stream, AnimationMap.KGSC);
+						}
+						catch (final IOException e) {
+							throw new RuntimeException(e);
+						}
+						token = null;
+						break;
+					default:
+						break InteriorParsing;
 				}
 			}
 			while (this.delegate.hasNext());

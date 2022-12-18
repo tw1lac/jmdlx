@@ -5,10 +5,17 @@ import java.io.IOException;
 import app.retera.parsers.mdlx.MdlTokenInputStream;
 import app.retera.parsers.mdlx.MdlTokenOutputStream;
 import app.retera.util.ParseUtils;
+import app.retera.util.War3ID;
 import com.google.common.io.LittleEndianDataInputStream;
 import com.google.common.io.LittleEndianDataOutputStream;
 
 public final class UInt32Timeline extends Timeline<long[]> {
+
+	public UInt32Timeline(War3ID name){
+		super(name);
+	}
+	public UInt32Timeline(){
+	}
 
 	@Override
 	protected int size() {

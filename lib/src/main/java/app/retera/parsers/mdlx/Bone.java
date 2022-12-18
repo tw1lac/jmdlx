@@ -37,22 +37,18 @@ public class Bone extends GenericObject {
 
 				if (MdlUtils.TOKEN_MULTIPLE.equals(token)) {
 					this.geosetId = -1;
-				}
-				else {
+				} else {
 					this.geosetId = Integer.parseInt(token);
 				}
-			}
-			else if (MdlUtils.TOKEN_GEOSETANIMID.equals(token)) {
+			} else if (MdlUtils.TOKEN_GEOSETANIMID.equals(token)) {
 				token = stream.read();
 
 				if (MdlUtils.TOKEN_NONE.equals(token)) {
 					this.geosetAnimationId = -1;
-				}
-				else {
+				} else {
 					this.geosetAnimationId = Integer.parseInt(token);
 				}
-			}
-			else {
+			} else {
 				throw new RuntimeException("Unknown token in Bone " + this.name + ": " + token);
 			}
 		}
@@ -65,14 +61,12 @@ public class Bone extends GenericObject {
 
 		if (this.geosetId == -1) {
 			stream.writeAttrib(MdlUtils.TOKEN_GEOSETID, MdlUtils.TOKEN_MULTIPLE);
-		}
-		else {
+		} else {
 			stream.writeAttrib(MdlUtils.TOKEN_GEOSETID, this.geosetId);
 		}
 		if (this.geosetAnimationId == -1) {
 			stream.writeAttrib(MdlUtils.TOKEN_GEOSETANIMID, MdlUtils.TOKEN_NONE);
-		}
-		else {
+		} else {
 			stream.writeAttrib(MdlUtils.TOKEN_GEOSETANIMID, this.geosetAnimationId);
 		}
 

@@ -40,20 +40,11 @@ public class Texture implements MdlxBlock {
 	public void readMdl(final MdlTokenInputStream stream) throws IOException {
 		for (final String token : stream.readBlock()) {
 			switch (token) {
-			case MdlUtils.TOKEN_IMAGE:
-				this.path = stream.read();
-				break;
-			case MdlUtils.TOKEN_REPLACEABLE_ID:
-				this.replaceableId = stream.readInt();
-				break;
-			case MdlUtils.TOKEN_WRAP_WIDTH:
-				this.flags |= 0x1;
-				break;
-			case MdlUtils.TOKEN_WRAP_HEIGHT:
-				this.flags |= 0x2;
-				break;
-			default:
-				throw new IllegalStateException("Unknown token in Texture: " + token);
+				case MdlUtils.TOKEN_IMAGE -> this.path = stream.read();
+				case MdlUtils.TOKEN_REPLACEABLE_ID -> this.replaceableId = stream.readInt();
+				case MdlUtils.TOKEN_WRAP_WIDTH -> this.flags |= 0x1;
+				case MdlUtils.TOKEN_WRAP_HEIGHT -> this.flags |= 0x2;
+				default -> throw new IllegalStateException("Unknown token in Texture: " + token);
 			}
 		}
 	}

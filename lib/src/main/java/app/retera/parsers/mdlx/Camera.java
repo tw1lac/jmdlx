@@ -63,41 +63,24 @@ public class Camera extends AnimatedObject {
 
 		for (final String token : stream.readBlock()) {
 			switch (token) {
-			case MdlUtils.TOKEN_POSITION:
-				stream.readFloatArray(this.position);
-				break;
-			case MdlUtils.TOKEN_TRANSLATION:
-				readTimeline(stream, AnimationMap.KCTR);
-				break;
-			case MdlUtils.TOKEN_ROTATION:
-				readTimeline(stream, AnimationMap.KCRL);
-				break;
-			case MdlUtils.TOKEN_FIELDOFVIEW:
-				this.fieldOfView = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_FARCLIP:
-				this.farClippingPlane = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_NEARCLIP:
-				this.nearClippingPlane = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_TARGET:
-				for (final String subToken : stream.readBlock()) {
-					switch (subToken) {
-					case MdlUtils.TOKEN_POSITION:
-						stream.readFloatArray(this.targetPosition);
-						break;
-					case MdlUtils.TOKEN_TRANSLATION:
-						readTimeline(stream, AnimationMap.KTTR);
-						break;
-					default:
-						throw new IllegalStateException(
-								"Unknown token in Camera " + this.name + "'s Target: " + subToken);
-					}
-				}
-				break;
-			default:
-				throw new IllegalStateException("Unknown token in Camera " + this.name + ": " + token);
+				case MdlUtils.TOKEN_POSITION -> stream.readFloatArray(this.position);
+				case MdlUtils.TOKEN_TRANSLATION -> readTimeline(stream, AnimationMap.KCTR);
+				case MdlUtils.TOKEN_ROTATION -> readTimeline(stream, AnimationMap.KCRL);
+				case MdlUtils.TOKEN_FIELDOFVIEW -> this.fieldOfView = stream.readFloat();
+				case MdlUtils.TOKEN_FARCLIP -> this.farClippingPlane = stream.readFloat();
+				case MdlUtils.TOKEN_NEARCLIP -> this.nearClippingPlane = stream.readFloat();
+				case MdlUtils.TOKEN_TARGET -> readTargetChunk(stream);
+				default -> throw new IllegalStateException("Unknown token in Camera " + this.name + ": " + token);
+			}
+		}
+	}
+
+	private void readTargetChunk(MdlTokenInputStream stream) throws IOException {
+		for (final String subToken : stream.readBlock()) {
+			switch (subToken) {
+				case MdlUtils.TOKEN_POSITION -> stream.readFloatArray(this.targetPosition);
+				case MdlUtils.TOKEN_TRANSLATION -> readTimeline(stream, AnimationMap.KTTR);
+				default -> throw new IllegalStateException("Unknown token in Camera " + this.name + "'s Target: " + subToken);
 			}
 		}
 	}

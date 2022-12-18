@@ -55,29 +55,14 @@ public class Sequence implements MdlxBlock {
 
 		for (final String token : stream.readBlock()) {
 			switch (token) {
-			case MdlUtils.TOKEN_INTERVAL:
-				stream.readIntArray(this.interval);
-				break;
-			case MdlUtils.TOKEN_NONLOOPING:
-				this.flags = 1;
-				break;
-			case MdlUtils.TOKEN_MOVESPEED:
-				this.moveSpeed = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_RARITY:
-				this.rarity = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_MINIMUM_EXTENT:
-				stream.readFloatArray(this.extent.min);
-				break;
-			case MdlUtils.TOKEN_MAXIMUM_EXTENT:
-				stream.readFloatArray(this.extent.max);
-				break;
-			case MdlUtils.TOKEN_BOUNDSRADIUS:
-				this.extent.boundsRadius = stream.readFloat();
-				break;
-			default:
-				throw new IllegalStateException("Unknown token in Sequence \"" + this.name + "\": " + token);
+				case MdlUtils.TOKEN_INTERVAL -> stream.readIntArray(this.interval);
+				case MdlUtils.TOKEN_NONLOOPING -> this.flags = 1;
+				case MdlUtils.TOKEN_MOVESPEED -> this.moveSpeed = stream.readFloat();
+				case MdlUtils.TOKEN_RARITY -> this.rarity = stream.readFloat();
+				case MdlUtils.TOKEN_MINIMUM_EXTENT -> stream.readFloatArray(this.extent.min);
+				case MdlUtils.TOKEN_MAXIMUM_EXTENT -> stream.readFloatArray(this.extent.max);
+				case MdlUtils.TOKEN_BOUNDSRADIUS -> this.extent.boundsRadius = stream.readFloat();
+				default -> throw new IllegalStateException("Unknown token in Sequence \"" + this.name + "\": " + token);
 			}
 		}
 	}

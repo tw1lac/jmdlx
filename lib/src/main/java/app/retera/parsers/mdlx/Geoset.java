@@ -131,119 +131,87 @@ public class Geoset implements MdlxBlock, Chunk {
 		final List<Extent> sequenceExtents = new ArrayList<>();
 		for (final String token : stream.readBlock()) {
 			switch (token) {
-			case MdlUtils.TOKEN_VERTICES:
-				this.vertices = stream.readVectorArray(new float[stream.readInt() * 3], 3);
-				break;
-			case MdlUtils.TOKEN_NORMALS:
-				this.normals = stream.readVectorArray(new float[stream.readInt() * 3], 3);
-				break;
-			case MdlUtils.TOKEN_TVERTICES:
-				this.uvSets = Arrays.copyOf(this.uvSets, this.uvSets.length + 1);
-				this.uvSets[this.uvSets.length - 1] = stream.readVectorArray(new float[stream.readInt() * 2], 2);
-				break;
-			case MdlUtils.TOKEN_VERTEX_GROUP: {
-				// Vertex groups are stored in a block with no count, can't allocate the buffer
-				// yet.
-				final List<Short> vertexGroups = new ArrayList<>();
-				for (final String vertexGroup : stream.readBlock()) {
-					vertexGroups.add(Short.valueOf(vertexGroup));
+				case MdlUtils.TOKEN_VERTICES -> this.vertices = stream.readVectorArray(new float[stream.readInt() * 3], 3);
+				case MdlUtils.TOKEN_NORMALS -> this.normals = stream.readVectorArray(new float[stream.readInt() * 3], 3);
+				case MdlUtils.TOKEN_TVERTICES -> {
+					this.uvSets = Arrays.copyOf(this.uvSets, this.uvSets.length + 1);
+					this.uvSets[this.uvSets.length - 1] = stream.readVectorArray(new float[stream.readInt() * 2], 2);
 				}
-
-				this.vertexGroups = new short[vertexGroups.size()];
-				int i = 0;
-				for (final Short vertexGroup : vertexGroups) {
-					this.vertexGroups[i++] = vertexGroup.shortValue();
-				}
-			}
-				break;
-			case MdlUtils.TOKEN_FACES:
-				// For now hardcoded for triangles, until I see a model with something
-				// different.
-				this.faceTypeGroups = new long[] { 4L };
-
-				stream.readInt(); // number of groups
-
-				final int count = stream.readInt();
-
-				stream.read(); // {
-				stream.read(); // Triangles
-				stream.read(); // {
-
-				this.faces = stream.readUInt16Array(new int[count]);
-				this.faceGroups = new long[] { count };
-
-				stream.read(); // }
-				stream.read(); // }
-				break;
-			case MdlUtils.TOKEN_GROUPS: {
-				final List<Integer> indices = new ArrayList<>();
-				final List<Integer> groups = new ArrayList<>();
-
-				stream.readInt(); // matrices count
-				stream.readInt(); // total indices
-
-				// eslint-disable-next-line no-unused-vars
-				for (final String matrix : stream.readBlock()) {
-					int size = 0;
-
-					for (final String index : stream.readBlock()) {
-						indices.add(Integer.valueOf(index));
-						size += 1;
+				case MdlUtils.TOKEN_VERTEX_GROUP -> {
+					// Vertex groups are stored in a block with no count, can't allocate the buffer
+					// yet.
+					final List<Short> vertexGroups = new ArrayList<>();
+					for (final String vertexGroup : stream.readBlock()) {
+						vertexGroups.add(Short.valueOf(vertexGroup));
 					}
-					groups.add(size);
-				}
 
-				this.matrixIndices = new long[indices.size()];
-				int i = 0;
-				for (final Integer index : indices) {
-					this.matrixIndices[i++] = index.intValue();
-				}
-				this.matrixGroups = new long[groups.size()];
-				i = 0;
-				for (final Integer group : groups) {
-					this.matrixGroups[i++] = group.intValue();
-				}
-			}
-				break;
-			case MdlUtils.TOKEN_MINIMUM_EXTENT:
-				stream.readFloatArray(this.extent.min);
-				break;
-			case MdlUtils.TOKEN_MAXIMUM_EXTENT:
-				stream.readFloatArray(this.extent.max);
-				break;
-			case MdlUtils.TOKEN_BOUNDSRADIUS:
-				this.extent.boundsRadius = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_ANIM:
-				final Extent extent = new Extent();
-
-				for (final String subToken : stream.readBlock()) {
-					switch (subToken) {
-					case MdlUtils.TOKEN_MINIMUM_EXTENT:
-						stream.readFloatArray(extent.min);
-						break;
-					case MdlUtils.TOKEN_MAXIMUM_EXTENT:
-						stream.readFloatArray(extent.max);
-						break;
-					case MdlUtils.TOKEN_BOUNDSRADIUS:
-						extent.boundsRadius = stream.readFloat();
-						break;
+					this.vertexGroups = new short[vertexGroups.size()];
+					int i = 0;
+					for (final Short vertexGroup : vertexGroups) {
+						this.vertexGroups[i++] = vertexGroup.shortValue();
 					}
 				}
+				case MdlUtils.TOKEN_FACES -> {
+					// For now hardcoded for triangles, until I see a model with something
+					// different.
+					this.faceTypeGroups = new long[] {4L};
+					stream.readInt(); // number of groups
+					final int count = stream.readInt();
+					stream.read(); // {
+					stream.read(); // Triangles
+					stream.read(); // {
+					this.faces = stream.readUInt16Array(new int[count]);
+					this.faceGroups = new long[] {count};
+					stream.read(); // }
+					stream.read(); // }
+				}
+				case MdlUtils.TOKEN_GROUPS -> {
+					final List<Integer> indices = new ArrayList<>();
+					final List<Integer> groups = new ArrayList<>();
 
-				sequenceExtents.add(extent);
-				break;
-			case MdlUtils.TOKEN_MATERIAL_ID:
-				this.materialId = stream.readInt();
-				break;
-			case MdlUtils.TOKEN_SELECTION_GROUP:
-				this.selectionGroup = stream.readInt();
-				break;
-			case MdlUtils.TOKEN_UNSELECTABLE:
-				this.selectionFlags = 4;
-				break;
-			default:
-				throw new RuntimeException("Unknown token in Geoset: " + token);
+					stream.readInt(); // matrices count
+					stream.readInt(); // total indices
+
+					// eslint-disable-next-line no-unused-vars
+					for (final String matrix : stream.readBlock()) {
+						int size = 0;
+
+						for (final String index : stream.readBlock()) {
+							indices.add(Integer.valueOf(index));
+							size += 1;
+						}
+						groups.add(size);
+					}
+
+					this.matrixIndices = new long[indices.size()];
+					int i = 0;
+					for (final Integer index : indices) {
+						this.matrixIndices[i++] = index.intValue();
+					}
+					this.matrixGroups = new long[groups.size()];
+					i = 0;
+					for (final Integer group : groups) {
+						this.matrixGroups[i++] = group.intValue();
+					}
+				}
+				case MdlUtils.TOKEN_MINIMUM_EXTENT -> stream.readFloatArray(this.extent.min);
+				case MdlUtils.TOKEN_MAXIMUM_EXTENT -> stream.readFloatArray(this.extent.max);
+				case MdlUtils.TOKEN_BOUNDSRADIUS -> this.extent.boundsRadius = stream.readFloat();
+				case MdlUtils.TOKEN_ANIM -> {
+					final Extent extent = new Extent();
+					for (final String subToken : stream.readBlock()) {
+						switch (subToken) {
+							case MdlUtils.TOKEN_MINIMUM_EXTENT -> stream.readFloatArray(extent.min);
+							case MdlUtils.TOKEN_MAXIMUM_EXTENT -> stream.readFloatArray(extent.max);
+							case MdlUtils.TOKEN_BOUNDSRADIUS -> extent.boundsRadius = stream.readFloat();
+						}
+					}
+					sequenceExtents.add(extent);
+				}
+				case MdlUtils.TOKEN_MATERIAL_ID -> this.materialId = stream.readInt();
+				case MdlUtils.TOKEN_SELECTION_GROUP -> this.selectionGroup = stream.readInt();
+				case MdlUtils.TOKEN_UNSELECTABLE -> this.selectionFlags = 4;
+				default -> throw new RuntimeException("Unknown token in Geoset: " + token);
 			}
 		}
 		this.sequenceExtents = sequenceExtents.toArray(new Extent[sequenceExtents.size()]);
@@ -261,8 +229,8 @@ public class Geoset implements MdlxBlock, Chunk {
 		}
 
 		stream.startBlock(MdlUtils.TOKEN_VERTEX_GROUP);
-		for (int i = 0; i < this.vertexGroups.length; i++) {
-			stream.writeLine(this.vertexGroups[i] + ",");
+		for (short vertexGroup : this.vertexGroups) {
+			stream.writeLine(vertexGroup + ",");
 		}
 		stream.endBlock();
 
@@ -270,14 +238,14 @@ public class Geoset implements MdlxBlock, Chunk {
 		// different.
 		stream.startBlock(MdlUtils.TOKEN_FACES, 1, this.faces.length);
 		stream.startBlock(MdlUtils.TOKEN_TRIANGLES);
-		final StringBuffer facesBuffer = new StringBuffer();
+		final StringBuilder facesBuffer = new StringBuilder();
 		for (final int faceValue : this.faces) {
 			if (facesBuffer.length() > 0) {
 				facesBuffer.append(", ");
 			}
 			facesBuffer.append(faceValue);
 		}
-		stream.writeLine("{ " + facesBuffer.toString() + " },");
+		stream.writeLine("{ " + facesBuffer + " },");
 		stream.endBlock();
 		stream.endBlock();
 
@@ -308,11 +276,18 @@ public class Geoset implements MdlxBlock, Chunk {
 
 	@Override
 	public long getByteLength() {
-		long size = 120 + (this.vertices.length * 4) + (this.normals.length * 4) + (this.faceTypeGroups.length * 4)
-				+ (this.faceGroups.length * 4) + (this.faces.length * 2) + this.vertexGroups.length
-				+ (this.matrixGroups.length * 4) + (this.matrixIndices.length * 4) + (this.sequenceExtents.length * 28);
+		long size = 120
+				+ (this.vertices.length * 4L)
+				+ (this.normals.length * 4L)
+				+ (this.faceTypeGroups.length * 4L)
+				+ (this.faceGroups.length * 4L)
+				+ (this.faces.length * 2L)
+				+ this.vertexGroups.length
+				+ (this.matrixGroups.length * 4L)
+				+ (this.matrixIndices.length * 4L)
+				+ (this.sequenceExtents.length * 28L);
 		for (final float[] uvSet : this.uvSets) {
-			size += 8 + (uvSet.length * 4);
+			size += 8 + (uvSet.length * 4L);
 		}
 		return size;
 	}

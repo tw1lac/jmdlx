@@ -29,7 +29,7 @@ public abstract class AnimatedObject implements Chunk, MdlxBlock {
 			if (animationMap == null) {
 				throw new IllegalStateException("Unable to parse: '" + name + "'");
 			}
-			final Timeline<?> timeline = animationMap.getImplementation().createTimeline();
+			final Timeline<?> timeline = animationMap.getNewTimeline();
 
 			timeline.readMdx(stream, name);
 
@@ -50,7 +50,7 @@ public abstract class AnimatedObject implements Chunk, MdlxBlock {
 	}
 
 	public void readTimeline(final MdlTokenInputStream stream, final AnimationMap name) throws IOException {
-		final Timeline<?> timeline = name.getImplementation().createTimeline();
+		final Timeline<?> timeline = name.getNewTimeline();
 
 		timeline.readMdl(stream, name.getWar3id());
 

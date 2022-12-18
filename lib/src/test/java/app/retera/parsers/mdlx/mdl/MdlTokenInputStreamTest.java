@@ -1,5 +1,6 @@
 package app.retera.parsers.mdlx.mdl;
 
+import app.retera.parsers.mdlx.MdlTokenInputStream;
 import app.retera.parsers.mdlx.MdlxModel;
 import org.junit.jupiter.api.Test;
 
@@ -7,11 +8,11 @@ import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MdlTokenInputStreamImplTest {
+public class MdlTokenInputStreamTest {
     @Test
     void basicTokenParsing() {
         MdlxModel model = new MdlxModel();
-        MdlTokenInputStreamImpl stream = new MdlTokenInputStreamImpl(new StringReader("This { Is A Test }"));
+        MdlTokenInputStream stream = new MdlTokenInputStream(new StringReader("This { Is A Test }"));
         assertEquals("This", stream.read());
         assertEquals("{", stream.read());
         assertEquals("Is", stream.read());
@@ -23,7 +24,7 @@ public class MdlTokenInputStreamImplTest {
     @Test
     void stringTokenParsing() {
         MdlxModel model = new MdlxModel();
-        MdlTokenInputStreamImpl stream = new MdlTokenInputStreamImpl(new StringReader("This { Is A \"Test\" }"));
+        MdlTokenInputStream stream = new MdlTokenInputStream(new StringReader("This { Is A \"Test\" }"));
         assertEquals("This", stream.read());
         assertEquals("{", stream.read());
         assertEquals("Is", stream.read());

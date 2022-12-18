@@ -1,59 +1,235 @@
 package app.retera.parsers.mdlx;
 
-public interface MdlTokenOutputStream {
-	void writeKeyframe(String prefix, long uInt32Value);
+import java.io.IOException;
 
-	void writeKeyframe(String prefix, float floatValue);
+public class MdlTokenOutputStream {
+	private final Appendable buffer;
+	private final int index;
+	private int ident;
+	private final int fractionDigits;
 
-	void writeKeyframe(String prefix, float[] floatArrayValues);
+	public MdlTokenOutputStream(final Appendable appendable) {
+		this.buffer = appendable;
+		this.index = 0;
+		this.ident = 0; // Used for writing blocks nicely.
+		this.fractionDigits = 6; // The number of fraction digits when writing floats.
+	}
 
-	void indent();
+	public void writeKeyframe(final String prefix, final long uInt32Value) {
+		writeAttribUInt32(prefix, uInt32Value);
+	}
 
-	void unindent();
+	public void writeKeyframe(final String prefix, final float floatValue) {
+		writeFloatAttrib(prefix, floatValue);
+	}
 
-	void startObjectBlock(String name, String objectName);
+	public void writeKeyframe(final String prefix, final float[] floatArrayValues) {
+		writeFloatArrayAttrib(prefix, floatArrayValues);
+	}
 
-	void startBlock(String name, int blockSize);
+	public void indent() {
+		this.ident += 1;
+	}
 
-	void startBlock(String name);
+	public void unindent() {
+		this.ident -= 1;
+	}
 
-	void writeFlag(String token);
+	public void startObjectBlock(final String name, final String objectName) {
+		this.writeLine(name + " \"" + objectName + "\" {");
+		this.ident += 1;
+	}
 
-	void writeFlagUInt32(long flag);
+	public void startBlock(final String name, final int blockSize) {
+		this.writeLine(name + " " + blockSize + " {" + "");
+		this.ident += 1;
+	}
 
-	void writeAttrib(String string, int globalSequenceId);
+	public void startBlock(final String name) {
+		this.writeLine(name + " {" + "");
+		this.ident += 1;
+	}
 
-	void writeAttribUInt32(String attribName, long uInt);
+	public void writeFlag(final String token) {
+		this.writeLine(token + ",");
+	}
 
-	void writeAttrib(String string, String value);
+	public void writeFlagUInt32(final long flag) {
+		this.writeLine(flag + ",");
+	}
 
-	void writeFloatAttrib(String attribName, float value);
+	public void writeAttrib(final String string, final int globalSequenceId) {
+		writeLine(string + " " + globalSequenceId + ",");
+	}
 
-	// if this matches writeAttrib(String,String),
-	// then remove it
-	void writeStringAttrib(String attribName, String value);
+	public void writeAttribUInt32(final String attribName, final long uInt) {
+		writeLine(attribName + " " + uInt + ",");
+	}
 
-	void writeFloatArrayAttrib(String attribName, float[] floatArray);
+	public void writeAttrib(final String string, final String value) {
+		writeLine(string + " " + value + ",");
+	}
 
-	void writeLongSubArrayAttrib(String attribName, long[] array, int startIndexInclusive, int endIndexExclusive);
+	public void writeFloatAttrib(final String attribName, final float value) {
+		writeLine(attribName + " " + value + ",");
+	}
 
-	void writeFloatArray(float[] floatArray);
+	public void writeStringAttrib(final String attribName, final String value) {
+		writeLine(attribName + " \"" + value + "\",");
+	}
 
-	void writeVectorArray(String token, float[] vectors, int vectorLength);
+	public void writeFloatArrayAttrib(final String attribName, final float[] floatArray) {
+		this.writeLine(attribName + " { " + formatFloatArray(floatArray) + " },");
+	}
 
-	void endBlock();
+	public void writeLongSubArrayAttrib(final String attribName,
+	                                    final long[] array,
+	                                    final int startIndexInclusive,
+	                                    final int endIndexExclusive) {
+		this.writeLine(attribName + " { " + formatLongSubArray(array, startIndexInclusive, endIndexExclusive) + " },");
+	}
 
-	void endBlockComma();
+	public void writeFloatArray(final float[] floatArray) {
+		this.writeLine("{ " + formatFloatArray(floatArray) + " },");
+	}
+	public void writeFloatSubArray(final float[] floatArray,
+	                               final int startIndexInclusive,
+	                               final int endIndexExclusive) {
+		this.writeLine("{ " + formatFloatSubArray(floatArray, startIndexInclusive, endIndexExclusive) + " },");
+	}
 
-	void writeLine(String string);
+	public void writeVectorArray(final String token, final float[] vectors, final int vectorLength) {
+		this.startBlock(token, vectors.length / vectorLength);
 
-	void startBlock(String tokenFaces, int sizeNumberProbably, int length);
+		for (int i = 0, l = vectors.length; i < l; i += vectorLength) {
+			this.writeFloatSubArray(vectors, i, i + vectorLength);
+		}
 
-	void writeColor(String tokenStaticColor, float[] color);
+		this.endBlock();
+	}
 
-	void writeArrayAttrib(String tokenAlpha, short[] uint8Array);
+	public void endBlock() {
+		this.ident -= 1;
+		this.writeLine("}");
+	}
 
-	void writeArrayAttrib(String tokenAlpha, int[] uint16Array);
+	public void endBlockComma() {
+		this.ident -= 1;
+		this.writeLine("},");
+	}
 
-	void writeArrayAttrib(String tokenAlpha, long[] uint32Array);
+	public void writeLine(final String string) {
+		try {
+			for (int i = 0; i < this.ident; i++) {
+				this.buffer.append('\t');
+			}
+			this.buffer.append(string);
+			this.buffer.append('\n');
+		}
+		catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void startBlock(final String tokenFaces, final int sizeNumberProbably, final int length) {
+		this.writeLine(tokenFaces + " " + sizeNumberProbably + " " + length + " {" + "");
+		this.ident += 1;
+	}
+
+	public void writeColor(final String tokenStaticColor, final float[] color) {
+		this.writeLine(tokenStaticColor + " { " + color[2] + ", " + color[1] + ", " + color[0] + " },");
+	}
+
+	public void writeArrayAttrib(final String tokenAlpha, final short[] uint8Array) {
+		this.writeLine(tokenAlpha + " { " + formatShortArray(uint8Array) + " },");
+	}
+
+	public void writeArrayAttrib(final String tokenAlpha, final int[] uint16Array) {
+		this.writeLine(tokenAlpha + " { " + formatIntArray(uint16Array) + " },");
+	}
+
+	public void writeArrayAttrib(final String tokenAlpha, final long[] uint32Array) {
+		this.writeLine(tokenAlpha + " { " + formatLongArray(uint32Array) + " },");
+	}
+
+	private String formatFloat(final float value) {
+		final String s = Float.toString(value);
+		final String f = String.format("%." + this.fractionDigits + "f", value);
+		if (s.length() > f.length()) {
+			return f;
+		}
+		else {
+			return s;
+		}
+	}
+
+	private String formatFloatArray(final float[] value) {
+		final StringBuilder stringBuilder = new StringBuilder();
+		for (float v : value) {
+			if (0 < stringBuilder.length()) {
+				stringBuilder.append(", ");
+			}
+			stringBuilder.append(formatFloat(v));
+		}
+		return stringBuilder.toString();
+	}
+
+	private String formatLongArray(final long[] value) {
+		final StringBuilder stringBuilder = new StringBuilder();
+		for (long item : value) {
+			if (0 < stringBuilder.length()) {
+				stringBuilder.append(", ");
+			}
+			stringBuilder.append(item);
+		}
+		return stringBuilder.toString();
+	}
+
+	private String formatShortArray(final short[] value) {
+		final StringBuilder stringBuilder = new StringBuilder();
+		for (short item : value) {
+			if (0 < stringBuilder.length()) {
+				stringBuilder.append(", ");
+			}
+			stringBuilder.append(item);
+		}
+		return stringBuilder.toString();
+	}
+
+	private String formatIntArray(final int[] value) {
+		final StringBuilder stringBuilder = new StringBuilder();
+		for (int j : value) {
+			if (0 < stringBuilder.length()) {
+				stringBuilder.append(", ");
+			}
+			stringBuilder.append(j);
+		}
+		return stringBuilder.toString();
+	}
+
+	private String formatLongSubArray(final long[] value,
+	                                  final int startIndexInclusive,
+	                                  final int endIndexExclusive) {
+		final StringBuilder stringBuilder = new StringBuilder();
+		for (int i = startIndexInclusive; i < endIndexExclusive; i++) {
+			if (0 < stringBuilder.length()) {
+				stringBuilder.append(", ");
+			}
+			stringBuilder.append(value[i]);
+		}
+		return stringBuilder.toString();
+	}
+
+	private String formatFloatSubArray(final float[] value,
+	                                   final int startIndexInclusive,
+	                                   final int endIndexExclusive) {
+		final StringBuilder stringBuilder = new StringBuilder();
+		for (int i = startIndexInclusive; i < endIndexExclusive; i++) {
+			if (0 < stringBuilder.length()) {
+				stringBuilder.append(", ");
+			}
+			stringBuilder.append(formatFloat(value[i]));
+		}
+		return stringBuilder.toString();
+	}
 }

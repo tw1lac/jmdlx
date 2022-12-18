@@ -43,28 +43,19 @@ public class GeosetAnimation extends AnimatedObject {
 		while (blockIterator.hasNext()) {
 			final String token = blockIterator.next();
 			switch (token) {
-			case MdlUtils.TOKEN_DROP_SHADOW:
-				this.flags |= 0x1;
-				break;
-			case MdlUtils.TOKEN_STATIC_ALPHA:
-				this.alpha = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_ALPHA:
-				this.readTimeline(stream, AnimationMap.KGAO);
-				break;
-			case MdlUtils.TOKEN_STATIC_COLOR:
-				this.flags |= 0x2;
-				stream.readColor(this.color);
-				break;
-			case MdlUtils.TOKEN_COLOR:
-				this.flags |= 0x2;
-				readTimeline(stream, AnimationMap.KGAC);
-				break;
-			case MdlUtils.TOKEN_GEOSETID:
-				this.geosetId = stream.readInt();
-				break;
-			default:
-				throw new IllegalStateException("Unknown token in GeosetAnimation: " + token);
+				case MdlUtils.TOKEN_DROP_SHADOW -> this.flags |= 0x1;
+				case MdlUtils.TOKEN_STATIC_ALPHA -> this.alpha = stream.readFloat();
+				case MdlUtils.TOKEN_ALPHA -> this.readTimeline(stream, AnimationMap.KGAO);
+				case MdlUtils.TOKEN_STATIC_COLOR -> {
+					this.flags |= 0x2;
+					stream.readColor(this.color);
+				}
+				case MdlUtils.TOKEN_COLOR -> {
+					this.flags |= 0x2;
+					readTimeline(stream, AnimationMap.KGAC);
+				}
+				case MdlUtils.TOKEN_GEOSETID -> this.geosetId = stream.readInt();
+				default -> throw new IllegalStateException("Unknown token in GeosetAnimation: " + token);
 			}
 		}
 	}
@@ -82,8 +73,7 @@ public class GeosetAnimation extends AnimatedObject {
 		}
 
 		if ((this.flags & 0x2) != 0) {
-			if (!this.writeTimeline(stream, AnimationMap.KGAC)
-					&& ((this.color[0] != 0) || (this.color[1] != 0) || (this.color[2] != 0))) {
+			if (!this.writeTimeline(stream, AnimationMap.KGAC) && ((this.color[0] != 0) || (this.color[1] != 0) || (this.color[2] != 0))) {
 				stream.writeColor(MdlUtils.TOKEN_STATIC_COLOR + " ", this.color); // TODO why the space?
 			}
 		}

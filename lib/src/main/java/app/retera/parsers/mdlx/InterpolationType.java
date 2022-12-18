@@ -1,7 +1,10 @@
 package app.retera.parsers.mdlx;
 
 public enum InterpolationType {
-	DONT_INTERP, LINEAR, BEZIER, HERMITE;
+	DONT_INTERP,
+	LINEAR,
+	BEZIER,
+	HERMITE;
 
 	public static final InterpolationType[] VALUES = values();
 

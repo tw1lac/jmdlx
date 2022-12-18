@@ -105,8 +105,8 @@ public class ParseUtils {
 
 	public static void writeFloatArray(final LittleEndianDataOutputStream stream, final float[] array)
 			throws IOException {
-		for (int i = 0; i < array.length; i++) {
-			stream.writeFloat(array[i]);
+		for (float v : array) {
+			stream.writeFloat(v);
 		}
 	}
 
@@ -124,29 +124,29 @@ public class ParseUtils {
 
 	public static void writeUInt32Array(final LittleEndianDataOutputStream stream, final long[] array)
 			throws IOException {
-		for (int i = 0; i < array.length; i++) {
-			writeUInt32(stream, array[i]);
+		for (long l : array) {
+			writeUInt32(stream, l);
 		}
 	}
 
 	public static void writeInt32Array(final LittleEndianDataOutputStream stream, final int[] array)
 			throws IOException {
-		for (int i = 0; i < array.length; i++) {
-			stream.writeInt(array[i]);
+		for (int j : array) {
+			stream.writeInt(j);
 		}
 	}
 
 	public static void writeUInt16Array(final LittleEndianDataOutputStream stream, final int[] array)
 			throws IOException {
-		for (int i = 0; i < array.length; i++) {
-			writeUInt16(stream, array[i]);
+		for (int j : array) {
+			writeUInt16(stream, j);
 		}
 	}
 
 	public static void writeUInt8Array(final LittleEndianDataOutputStream stream, final short[] array)
 			throws IOException {
-		for (int i = 0; i < array.length; i++) {
-			writeUInt8(stream, array[i]);
+		for (short value : array) {
+			writeUInt8(stream, value);
 		}
 	}
 

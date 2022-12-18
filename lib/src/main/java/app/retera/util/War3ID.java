@@ -15,12 +15,16 @@ public final class War3ID implements Comparable<War3ID> {
 	public static War3ID fromString(String idString) {
 		if (idString.length() == 3) {
 			System.err.println(
-					"Loaded custom data for the ability CURSE whose MetaData field, 'Crs', is the only 3 letter app.retera.util.War3ID in the game. This might cause unexpected errors, so watch your % chance to miss in custom curse abilities carefully.");
+					"Loaded custom data for the ability CURSE whose MetaData field, " +
+							"'Crs', is the only 3 letter app.retera.util.War3ID in the game. " +
+							"This might cause unexpected errors, so watch your % chance to miss " +
+							"in custom curse abilities carefully.");
 			idString += '\0';
 		}
 		if (idString.length() != 4) {
 			throw new IllegalArgumentException(
-					"A app.retera.util.War3ID must be 4 ascii characters in length (got " + idString.length() + ") '" + idString + "'");
+					"A app.retera.util.War3ID must be 4 ascii characters in length " +
+							"(got " + idString.length() + ") '" + idString + "'");
 		}
 		return new War3ID(RawcodeUtils.toInt(idString));
 	}
@@ -60,20 +64,10 @@ public final class War3ID implements Comparable<War3ID> {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
+		if (obj instanceof War3ID) {
+			return this == obj || this.value == ((War3ID) obj).value;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final War3ID other = (War3ID) obj;
-		if (this.value != other.value) {
-			return false;
-		}
-		return true;
+		return false;
 	}
 
 	@Override

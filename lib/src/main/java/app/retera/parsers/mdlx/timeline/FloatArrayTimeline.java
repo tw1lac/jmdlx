@@ -5,6 +5,7 @@ import java.io.IOException;
 import app.retera.parsers.mdlx.MdlTokenInputStream;
 import app.retera.parsers.mdlx.MdlTokenOutputStream;
 import app.retera.util.ParseUtils;
+import app.retera.util.War3ID;
 import com.google.common.io.LittleEndianDataInputStream;
 import com.google.common.io.LittleEndianDataOutputStream;
 
@@ -12,6 +13,10 @@ public final class FloatArrayTimeline extends Timeline<float[]> {
 	private final int arraySize;
 
 	public FloatArrayTimeline(final int arraySize) {
+		this.arraySize = arraySize;
+	}
+	public FloatArrayTimeline(final int arraySize, War3ID name) {
+		super(name);
 		this.arraySize = arraySize;
 	}
 

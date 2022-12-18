@@ -33,6 +33,8 @@ public abstract class Timeline<TYPE> implements Chunk {
 		return this.name;
 	}
 
+	public Timeline(War3ID name) {
+	}
 	public Timeline() {
 	}
 
@@ -87,24 +89,13 @@ public abstract class Timeline<TYPE> implements Chunk {
 		stream.read(); // {
 
 		final String token = stream.read();
-		final InterpolationType interpolationType;
-		switch (token) {
-		case MdlUtils.TOKEN_DONT_INTERP:
-			interpolationType = InterpolationType.DONT_INTERP;
-			break;
-		case MdlUtils.TOKEN_LINEAR:
-			interpolationType = InterpolationType.LINEAR;
-			break;
-		case MdlUtils.TOKEN_HERMITE:
-			interpolationType = InterpolationType.HERMITE;
-			break;
-		case MdlUtils.TOKEN_BEZIER:
-			interpolationType = InterpolationType.BEZIER;
-			break;
-		default:
-			interpolationType = InterpolationType.DONT_INTERP;
-			break;
-		}
+		final InterpolationType interpolationType = switch (token) {
+			case MdlUtils.TOKEN_DONT_INTERP -> InterpolationType.DONT_INTERP;
+			case MdlUtils.TOKEN_LINEAR -> InterpolationType.LINEAR;
+			case MdlUtils.TOKEN_HERMITE -> InterpolationType.HERMITE;
+			case MdlUtils.TOKEN_BEZIER -> InterpolationType.BEZIER;
+			default -> InterpolationType.DONT_INTERP;
+		};
 
 		this.interpolationType = interpolationType;
 
@@ -140,24 +131,13 @@ public abstract class Timeline<TYPE> implements Chunk {
 		final int tracksCount = this.frames.length;
 		stream.startBlock(AnimationMap.ID_TO_TAG.get(this.name).getMdlToken(), tracksCount);
 
-		String token;
-		switch (this.interpolationType) {
-		case DONT_INTERP:
-			token = MdlUtils.TOKEN_DONT_INTERP;
-			break;
-		case LINEAR:
-			token = MdlUtils.TOKEN_LINEAR;
-			break;
-		case HERMITE:
-			token = MdlUtils.TOKEN_HERMITE;
-			break;
-		case BEZIER:
-			token = MdlUtils.TOKEN_BEZIER;
-			break;
-		default:
-			token = MdlUtils.TOKEN_DONT_INTERP;
-			break;
-		}
+		String token = switch (this.interpolationType) {
+			case DONT_INTERP -> MdlUtils.TOKEN_DONT_INTERP;
+			case LINEAR -> MdlUtils.TOKEN_LINEAR;
+			case HERMITE -> MdlUtils.TOKEN_HERMITE;
+			case BEZIER -> MdlUtils.TOKEN_BEZIER;
+			default -> MdlUtils.TOKEN_DONT_INTERP;
+		};
 
 		stream.writeFlag(token);
 
@@ -186,7 +166,7 @@ public abstract class Timeline<TYPE> implements Chunk {
 		final int tracksCount = this.frames.length;
 		int size = 16;
 
-		if (tracksCount > 0) {
+		if (0 < tracksCount) {
 			final int bytesPerValue = size() * 4;
 			int valuesPerTrack = 1;
 			if (this.interpolationType.tangential()) {

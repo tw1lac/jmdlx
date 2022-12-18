@@ -8,34 +8,42 @@ import com.google.common.io.LittleEndianDataInputStream;
 import com.google.common.io.LittleEndianDataOutputStream;
 
 public class CollisionShape extends GenericObject {
-	public static enum Type {
-		BOX,
-		PLANE,
-		SPHERE,
-		CYLINDER;
+	public static enum CollisionShapeType {
+		BOX(false, 2, MdlUtils.TOKEN_BOX),
+		PLANE(false, 2, MdlUtils.TOKEN_PLANE),
+		SPHERE(true, 1, MdlUtils.TOKEN_SPHERE),
+		CYLINDER(true, 2, MdlUtils.TOKEN_CYLINDER);
 
-		private static final Type[] VALUES = values();
+		private static final CollisionShapeType[] VALUES = values();
 
 		private final boolean boundsRadius;
+		private final int vertices;
+		private final String mdlName;
 
-		private Type() {
-			this.boundsRadius = false;
-		}
-
-		private Type(final boolean boundsRadius) {
+		private CollisionShapeType(final boolean boundsRadius, final int vertices, String mdlName) {
 			this.boundsRadius = boundsRadius;
+			this.vertices = vertices;
+			this.mdlName = mdlName;
 		}
 
 		public boolean isBoundsRadius() {
 			return this.boundsRadius;
 		}
 
-		public static Type from(final int index) {
+		public int getVertices() {
+			return vertices;
+		}
+
+		public String getMdlName() {
+			return mdlName;
+		}
+
+		public static CollisionShapeType from(final int index) {
 			return VALUES[index];
 		}
 	}
 
-	private Type type;
+	private CollisionShapeType type;
 	private final float[][] vertices = { new float[3], new float[3] };
 	private float boundsRadius;
 
@@ -48,13 +56,13 @@ public class CollisionShape extends GenericObject {
 		super.readMdx(stream);
 
 		final long typeIndex = ParseUtils.readUInt32(stream);
-		this.type = Type.from((int) typeIndex);
-		ParseUtils.readFloatArray(stream, this.vertices[0]);
+		type = CollisionShapeType.from((int) typeIndex);
 
-		if (this.type != Type.SPHERE) {
-			ParseUtils.readFloatArray(stream, this.vertices[1]);
+		for (int i = 0; i < type.getVertices(); i++) {
+			ParseUtils.readFloatArray(stream, this.vertices[i]);
 		}
-		if ((this.type == Type.SPHERE) || (this.type == Type.CYLINDER)) {
+
+		if (type.isBoundsRadius()) {
 			this.boundsRadius = stream.readFloat();
 		}
 	}
@@ -63,13 +71,17 @@ public class CollisionShape extends GenericObject {
 	public void writeMdx(final LittleEndianDataOutputStream stream) throws IOException {
 		super.writeMdx(stream);
 
-		ParseUtils.writeUInt32(stream, this.type == null ? -1 : this.type.ordinal());
-		ParseUtils.writeFloatArray(stream, this.vertices[0]);
-		if (this.type != Type.SPHERE) {
-			ParseUtils.writeFloatArray(stream, this.vertices[1]);
-		}
-		if ((this.type == Type.SPHERE) || (this.type == Type.CYLINDER)) {
-			stream.writeFloat(this.boundsRadius);
+		if (type != null) {
+			ParseUtils.writeUInt32(stream, type.ordinal());
+
+			for (int i = 0; i < type.getVertices(); i++) {
+				ParseUtils.writeFloatArray(stream, vertices[i]);
+			}
+			if (type.isBoundsRadius()) {
+				stream.writeFloat(this.boundsRadius);
+			}
+		} else {
+			ParseUtils.writeUInt32(stream, -1);
 		}
 	}
 
@@ -77,34 +89,20 @@ public class CollisionShape extends GenericObject {
 	public void readMdl(final MdlTokenInputStream stream) {
 		for (final String token : super.readMdlGeneric(stream)) {
 			switch (token) {
-			case MdlUtils.TOKEN_BOX:
-				this.type = Type.BOX;
-				break;
-			case MdlUtils.TOKEN_PLANE:
-				this.type = Type.PLANE;
-				break;
-			case MdlUtils.TOKEN_SPHERE:
-				this.type = Type.SPHERE;
-				break;
-			case MdlUtils.TOKEN_CYLINDER:
-				this.type = Type.CYLINDER;
-				break;
-			case MdlUtils.TOKEN_VERTICES:
-				final int count = stream.readInt();
-				stream.read(); // {
-
-				stream.readFloatArray(this.vertices[0]);
-				if (count == 2) {
-					stream.readFloatArray(this.vertices[1]);
+				case MdlUtils.TOKEN_BOX -> this.type = CollisionShapeType.BOX;
+				case MdlUtils.TOKEN_PLANE -> this.type = CollisionShapeType.PLANE;
+				case MdlUtils.TOKEN_SPHERE -> this.type = CollisionShapeType.SPHERE;
+				case MdlUtils.TOKEN_CYLINDER -> this.type = CollisionShapeType.CYLINDER;
+				case MdlUtils.TOKEN_VERTICES -> {
+					final int count = stream.readInt();
+					stream.read(); // {
+					for (int i = 0; i < count; i++) {
+						stream.readFloatArray(this.vertices[i]);
+					}
+					stream.read(); // }
 				}
-
-				stream.read(); // }
-				break;
-			case MdlUtils.TOKEN_BOUNDSRADIUS:
-				this.boundsRadius = stream.readFloat();
-				break;
-			default:
-				throw new RuntimeException("Unknown token in CollisionShape " + this.name + ": " + token);
+				case MdlUtils.TOKEN_BOUNDSRADIUS -> this.boundsRadius = stream.readFloat();
+				default -> throw new RuntimeException("Unknown token in CollisionShape " + this.name + ": " + token);
 			}
 		}
 	}
@@ -113,36 +111,21 @@ public class CollisionShape extends GenericObject {
 	public void writeMdl(final MdlTokenOutputStream stream) throws IOException {
 		stream.startObjectBlock(MdlUtils.TOKEN_COLLISION_SHAPE, this.name);
 		writeGenericHeader(stream);
-		String type;
-		int vertices = 2;
-		switch (this.type) {
-		case BOX:
-			type = MdlUtils.TOKEN_BOX;
-			break;
-		case PLANE:
-			type = MdlUtils.TOKEN_PLANE;
-			break;
-		case SPHERE:
-			type = MdlUtils.TOKEN_SPHERE;
-			vertices = 1;
-			break;
-		case CYLINDER:
-			type = MdlUtils.TOKEN_CYLINDER;
-			break;
-		default:
-			throw new IllegalStateException("Invalid type in CollisionShape " + this.name + ": " + this.type);
-		}
 
-		stream.writeFlag(type);
-		stream.startBlock(MdlUtils.TOKEN_VERTICES, vertices);
-		stream.writeFloatArray(this.vertices[0]);
-		if (vertices == 2) {
-			stream.writeFloatArray(this.vertices[1]);
-		}
-		stream.endBlock();
+		if (type != null) {
+			stream.writeFlag(type.getMdlName());
 
-		if (this.type.boundsRadius) {
-			stream.writeFloatAttrib(MdlUtils.TOKEN_BOUNDSRADIUS, this.boundsRadius);
+			stream.startBlock(MdlUtils.TOKEN_VERTICES, type.getVertices());
+			for (int i = 0; i < type.getVertices(); i++) {
+				stream.writeFloatArray(vertices[i]);
+			}
+			stream.endBlock();
+
+			if (type.isBoundsRadius()) {
+				stream.writeFloatAttrib(MdlUtils.TOKEN_BOUNDSRADIUS, this.boundsRadius);
+			}
+		} else {
+			throw new IllegalStateException("Invalid type in CollisionShape " + this.name + ": " + null);
 		}
 
 		writeGenericTimelines(stream);
@@ -151,13 +134,9 @@ public class CollisionShape extends GenericObject {
 
 	@Override
 	public long getByteLength() {
-		long size = 16 + super.getByteLength();
+		long size = super.getByteLength() + 4 + (12L * type.getVertices());
 
-		if (this.type != Type.SPHERE) {
-			size += 12;
-		}
-
-		if ((this.type == Type.SPHERE) || (this.type == Type.CYLINDER)) {
+		if (type.isBoundsRadius()) {
 			size += 4;
 		}
 
@@ -168,7 +147,7 @@ public class CollisionShape extends GenericObject {
 		return this.vertices;
 	}
 
-	public Type getType() {
+	public CollisionShapeType getType() {
 		return this.type;
 	}
 

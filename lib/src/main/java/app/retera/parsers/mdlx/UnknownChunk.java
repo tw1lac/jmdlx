@@ -11,8 +11,9 @@ public class UnknownChunk implements Chunk {
 	private final short[] chunk;
 	private final War3ID tag;
 
-	public UnknownChunk(final LittleEndianDataInputStream stream, final long size, final War3ID tag)
-			throws IOException {
+	public UnknownChunk(final LittleEndianDataInputStream stream,
+	                    final long size,
+	                    final War3ID tag) throws IOException {
 		System.err.println("Loading unknown chunk: " + tag);
 		this.chunk = ParseUtils.readUInt8Array(stream, (int) size);
 		this.tag = tag;

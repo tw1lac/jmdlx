@@ -56,56 +56,23 @@ public class Light extends GenericObject {
 	public void readMdl(final MdlTokenInputStream stream) throws IOException {
 		for (final String token : super.readMdlGeneric(stream)) {
 			switch (token) {
-			case MdlUtils.TOKEN_OMNIDIRECTIONAL:
-				this.type = 0;
-				break;
-			case MdlUtils.TOKEN_DIRECTIONAL:
-				this.type = 1;
-				break;
-			case MdlUtils.TOKEN_AMBIENT:
-				this.type = 2;
-				break;
-			case MdlUtils.TOKEN_STATIC_ATTENUATION_START:
-				this.attenuation[0] = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_ATTENUATION_START:
-				readTimeline(stream, AnimationMap.KLAS);
-				break;
-			case MdlUtils.TOKEN_STATIC_ATTENUATION_END:
-				this.attenuation[1] = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_ATTENUATION_END:
-				readTimeline(stream, AnimationMap.KLAE);
-				break;
-			case MdlUtils.TOKEN_STATIC_INTENSITY:
-				this.intensity = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_INTENSITY:
-				readTimeline(stream, AnimationMap.KLAI);
-				break;
-			case MdlUtils.TOKEN_STATIC_COLOR:
-				stream.readColor(this.color);
-				break;
-			case MdlUtils.TOKEN_COLOR:
-				readTimeline(stream, AnimationMap.KLAC);
-				break;
-			case MdlUtils.TOKEN_STATIC_AMB_INTENSITY:
-				this.ambientIntensity = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_AMB_INTENSITY:
-				readTimeline(stream, AnimationMap.KLBI);
-				break;
-			case MdlUtils.TOKEN_STATIC_AMB_COLOR:
-				stream.readColor(this.ambientColor);
-				break;
-			case MdlUtils.TOKEN_AMB_COLOR:
-				readTimeline(stream, AnimationMap.KLBC);
-				break;
-			case MdlUtils.TOKEN_VISIBILITY:
-				readTimeline(stream, AnimationMap.KLAV);
-				break;
-			default:
-				throw new IllegalStateException("Unknown token in Light: " + token);
+				case MdlUtils.TOKEN_OMNIDIRECTIONAL -> this.type = 0;
+				case MdlUtils.TOKEN_DIRECTIONAL -> this.type = 1;
+				case MdlUtils.TOKEN_AMBIENT -> this.type = 2;
+				case MdlUtils.TOKEN_STATIC_ATTENUATION_START -> this.attenuation[0] = stream.readFloat();
+				case MdlUtils.TOKEN_ATTENUATION_START -> readTimeline(stream, AnimationMap.KLAS);
+				case MdlUtils.TOKEN_STATIC_ATTENUATION_END -> this.attenuation[1] = stream.readFloat();
+				case MdlUtils.TOKEN_ATTENUATION_END -> readTimeline(stream, AnimationMap.KLAE);
+				case MdlUtils.TOKEN_STATIC_INTENSITY -> this.intensity = stream.readFloat();
+				case MdlUtils.TOKEN_INTENSITY -> readTimeline(stream, AnimationMap.KLAI);
+				case MdlUtils.TOKEN_STATIC_COLOR -> stream.readColor(this.color);
+				case MdlUtils.TOKEN_COLOR -> readTimeline(stream, AnimationMap.KLAC);
+				case MdlUtils.TOKEN_STATIC_AMB_INTENSITY -> this.ambientIntensity = stream.readFloat();
+				case MdlUtils.TOKEN_AMB_INTENSITY -> readTimeline(stream, AnimationMap.KLBI);
+				case MdlUtils.TOKEN_STATIC_AMB_COLOR -> stream.readColor(this.ambientColor);
+				case MdlUtils.TOKEN_AMB_COLOR -> readTimeline(stream, AnimationMap.KLBC);
+				case MdlUtils.TOKEN_VISIBILITY -> readTimeline(stream, AnimationMap.KLAV);
+				default -> throw new IllegalStateException("Unknown token in Light: " + token);
 			}
 		}
 	}
@@ -116,17 +83,10 @@ public class Light extends GenericObject {
 		writeGenericHeader(stream);
 
 		switch (this.type) {
-		case 0:
-			stream.writeFlag(MdlUtils.TOKEN_OMNIDIRECTIONAL);
-			break;
-		case 1:
-			stream.writeFlag(MdlUtils.TOKEN_DIRECTIONAL);
-			break;
-		case 2:
-			stream.writeFlag(MdlUtils.TOKEN_AMBIENT);
-			break;
-		default:
-			throw new IllegalStateException("Unable to save Light of type: " + this.type);
+			case 0 -> stream.writeFlag(MdlUtils.TOKEN_OMNIDIRECTIONAL);
+			case 1 -> stream.writeFlag(MdlUtils.TOKEN_DIRECTIONAL);
+			case 2 -> stream.writeFlag(MdlUtils.TOKEN_AMBIENT);
+			default -> throw new IllegalStateException("Unable to save Light of type: " + this.type);
 		}
 
 		if (!writeTimeline(stream, AnimationMap.KLAS)) {

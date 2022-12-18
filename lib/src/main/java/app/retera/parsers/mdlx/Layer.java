@@ -94,47 +94,20 @@ public class Layer extends AnimatedObject {
 		while (iterator.hasNext()) {
 			final String token = iterator.next();
 			switch (token) {
-			case MdlUtils.TOKEN_FILTER_MODE:
-				this.filterMode = FilterMode.fromId(FilterMode.nameToId(stream.read()));
-				break;
-			case MdlUtils.TOKEN_UNSHADED:
-				this.flags |= 0x1;
-				break;
-			case MdlUtils.TOKEN_SPHERE_ENV_MAP:
-				this.flags |= 0x2;
-				break;
-			case MdlUtils.TOKEN_TWO_SIDED:
-				this.flags |= 0x10;
-				break;
-			case MdlUtils.TOKEN_UNFOGGED:
-				this.flags |= 0x20;
-				break;
-			case MdlUtils.TOKEN_NO_DEPTH_TEST:
-				this.flags |= 0x40;
-				break;
-			case MdlUtils.TOKEN_NO_DEPTH_SET:
-				this.flags |= 0x100;
-				break;
-			case MdlUtils.TOKEN_STATIC_TEXTURE_ID:
-				this.textureId = stream.readInt();
-				break;
-			case MdlUtils.TOKEN_TEXTURE_ID:
-				readTimeline(stream, AnimationMap.KMTF);
-				break;
-			case MdlUtils.TOKEN_TVERTEX_ANIM_ID:
-				this.textureAnimationId = stream.readInt();
-				break;
-			case MdlUtils.TOKEN_COORD_ID:
-				this.coordId = stream.readInt();
-				break;
-			case MdlUtils.TOKEN_STATIC_ALPHA:
-				this.alpha = stream.readFloat();
-				break;
-			case MdlUtils.TOKEN_ALPHA:
-				readTimeline(stream, AnimationMap.KMTA);
-				break;
-			default:
-				throw new IllegalStateException("Unknown token in Layer: " + token);
+				case MdlUtils.TOKEN_FILTER_MODE -> this.filterMode = FilterMode.fromId(FilterMode.nameToId(stream.read()));
+				case MdlUtils.TOKEN_UNSHADED -> this.flags |= 0x1;
+				case MdlUtils.TOKEN_SPHERE_ENV_MAP -> this.flags |= 0x2;
+				case MdlUtils.TOKEN_TWO_SIDED -> this.flags |= 0x10;
+				case MdlUtils.TOKEN_UNFOGGED -> this.flags |= 0x20;
+				case MdlUtils.TOKEN_NO_DEPTH_TEST -> this.flags |= 0x40;
+				case MdlUtils.TOKEN_NO_DEPTH_SET -> this.flags |= 0x100;
+				case MdlUtils.TOKEN_STATIC_TEXTURE_ID -> this.textureId = stream.readInt();
+				case MdlUtils.TOKEN_TEXTURE_ID -> readTimeline(stream, AnimationMap.KMTF);
+				case MdlUtils.TOKEN_TVERTEX_ANIM_ID -> this.textureAnimationId = stream.readInt();
+				case MdlUtils.TOKEN_COORD_ID -> this.coordId = stream.readInt();
+				case MdlUtils.TOKEN_STATIC_ALPHA -> this.alpha = stream.readFloat();
+				case MdlUtils.TOKEN_ALPHA -> readTimeline(stream, AnimationMap.KMTA);
+				default -> throw new IllegalStateException("Unknown token in Layer: " + token);
 			}
 		}
 	}
